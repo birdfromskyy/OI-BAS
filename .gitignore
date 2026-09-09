@@ -1,0 +1,49 @@
+# Локальная конфигурация и секреты. В репозиторий попадает только шаблон.
+.env
+.env.*
+!.env.example
+.envrc
+*.local
+
+# Закрытые ключи, сертификаты и локальные резервные копии БД.
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+secrets/
+credentials/
+*.dump
+*.backup
+*.bak
+*.sql.gz
+*.sqlite
+*.sqlite3
+*.db
+
+# Логи, инструменты разработки и ОС.
+*.log
+logs/
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+
+# Frontend generated artifacts
+/frontend/node_modules
+/frontend/.svelte-kit
+/frontend/build
+/frontend/coverage
+
+# Backend generated artifacts
+/backend/bin
+/backend/tmp
+/backend/coverage
+*.coverprofile
+*.test
+
+# Vite transient files
+/frontend/vite.config.js.timestamp-*
+/frontend/vite.config.ts.timestamp-*

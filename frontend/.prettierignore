@@ -1,0 +1,15 @@
+# Package Managers
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lock
+bun.lockb
+
+# Miscellaneous
+/static/
+/.svelte-kit/
+/build/
+/node_modules/
+
+# Моки: данные сгруппированы по строкам вручную, читаемость важнее правил prettier
+/src/lib/mocs/
