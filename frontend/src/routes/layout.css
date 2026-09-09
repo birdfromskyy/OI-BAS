@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+/* ============================================================
+   ЭКИПАЖ — единственная тема, тёмная.
+   Переключения тем нет, поэтому палитра живёт прямо в @theme:
+   Tailwind сам объявит переменные в :root и сгенерирует утилиты.
+   Имя утилиты — то, что после префикса: --color-front → bg-front,
+   text-front, border-front; --spacing-touch → min-h-touch, h-touch.
+   ============================================================ */
+@theme {
+	/* Поверхности. Шаг между уровнями держится не меньше 1.4:1,
+	   иначе панель не отделяется от фона. */
+	--color-bg: #0f131e;
+	--color-front: #161c2c;
+	--color-border: #30363d;
+
+	/* Текст */
+	--color-text: #e6e9ef;
+	--color-text-muted: #99a3b8;
+	/* Чередование столбцов таблицы: чётные — основным цветом, нечётные — этим */
+	--color-text-alt: #94a3b8;
+
+	/* Акцент */
+	--color-accent: #f97316;
+	--color-accent-hover: #7ab3ff;
+	--color-accent-soft: #16233a;
+
+	/* Пустой день календаря. Должен быть светлее панели (--color-front),
+	   иначе сетка сливается с ней и карта не читается. */
+	--color-heat-empty: #272d37;
+	--color-heat-good: #39d353;
+	--color-heat-bad: #e8a317;
+	/* Красный тревоги: день с предупреждениями в календаре, критический износ.
+	   Отдельный токен от жёлтого нужен, чтобы «обрати внимание» и «так летать
+	   нельзя» не выглядели одинаково. Взят резкий, а не приглушённый: он
+	   появляется среди зелени календаря и должен останавливать взгляд. */
+	--color-heat-critical: #ff2d3e;
+	/* Идёт прямо сейчас: борт в воздухе, отправка на сервер. Синий выбран
+	   потому, что три остальных цвета уже заняты оценкой — «хорошо»,
+	   «обрати внимание», «плохо», — а происходящее оценки не имеет. */
+	--color-heat-live: #3987e5;
+
+	/* Размеры под работу одной рукой в перчатках (НФТ-5.1, НФТ-5.2).
+	   56px — минимум для перчатки, 72px — основная кнопка чеклиста. */
+	--spacing-touch: 3.5rem;
+	--spacing-touch-lg: 4.5rem;
+
+	/* Системный стек: веб-шрифты не подключаем — они уедут
+	   в precache и раздуют офлайн-бандл (НФТ-1.1). */
+	--font-sans:
+		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+	--font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.click {
+}
+.click:hover {
+	opacity: 0.7;
+	cursor: pointer;
+}
+
+@layer base {
+	/* Цвет рамки по умолчанию: в Tailwind v4 голый `border` берёт currentColor,
+	   поэтому задаём явно — иначе рамка красится цветом текста. */
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-border);
+	}
+
+	html {
+		/* Тёмные скроллбары и системные контролы */
+		color-scheme: dark;
+		background-color: var(--color-bg);
+		color: var(--color-text);
+		font-family: var(--font-sans);
+		-webkit-text-size-adjust: 100%;
+	}
+
+	/* Настройка пользователя fontScale = large */
+	[data-font-scale='large'] {
+		font-size: 118%;
+	}
+
+	body {
+		/* Запуск с домашнего экрана (НФТ-1.10) */
+		overscroll-behavior-y: contain;
+	}
+
+	/* Интерактивные цели не мельче пальца в перчатке */
+	button,
+	[role='button'],
+	a.btn,
+	input[type='checkbox'],
+	input[type='radio'] {
+		min-height: var(--spacing-touch);
+	}
+
+	:focus-visible {
+		outline: 3px solid var(--color-accent);
+		outline-offset: 2px;
+	}
+
+	::selection {
+		background: var(--color-accent-soft);
+	}
+}
+
+/* ============================================================
+   Поля ввода. Правила намеренно вне @layer: плагин
+   @tailwindcss/forms объявляет свои в конце base — серую рамку,
+   белый фон и синее кольцо при фокусе — и при равной
+   специфичности перебивал бы их. Здесь это снимается один раз
+   на весь проект, классы у каждого поля не нужны.
+   ============================================================ */
+input:not([type='checkbox'], [type='radio']),
+textarea,
+select {
+	border-width: 0;
+	background-color: var(--color-bg);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+	/* синее кольцо плагина убираем, подсветку даёт контур акцентом */
+	box-shadow: none;
+	border-color: var(--color-accent);
+	outline: 2px solid var(--color-accent);
+	outline-offset: 0;
+}
+
+/* ============================================================
+   Мобильная версия: с телефона открывается только чеклист,
+   и страница должна вести себя как приложение, а не как сайт.
+   ============================================================ */
+@media (max-width: 767px) {
+	html {
+		/* контент не растягивается при повороте и не даёт горизонтальной прокрутки */
+		overflow-x: hidden;
+	}
+
+	main {
+		/* высота окна за вычетом шапки: кнопки чеклиста остаются в нижней части экрана */
+		min-height: calc(100dvh - 5.5rem);
+		/* вырез и полоса жеста на iPhone (viewport-fit=cover в app.html) */
+		padding-bottom: max(1rem, env(safe-area-inset-bottom));
+	}
+}
