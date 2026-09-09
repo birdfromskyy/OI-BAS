@@ -1,0 +1,3703 @@
+<title>ЭКИПАЖ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+	rel="stylesheet"
+	href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+/>
+
+<style>
+	:root {
+		--ground: #f4f6f8;
+		--surface: #ffffff;
+		--surface-2: #edf1f5;
+		--ink: #101720;
+		--ink-2: #4e5a69;
+		--ink-3: #78848f;
+		--rule: #d6dde5;
+		--rule-soft: #e6ebf0;
+		--accent: #1f4e87;
+		--accent-2: #3b72b8;
+		--accent-soft: #e7eef7;
+		--ok: #1e7a52;
+		--ok-soft: #e2f1ea;
+		--warn: #8f5d00;
+		--warn-soft: #f7eedc;
+		--stop: #ae2a20;
+		--stop-soft: #f8e7e5;
+		--panel: #0d141b;
+		--panel-2: #16212b;
+		--panel-ink: #dce5ed;
+		--panel-ink-2: #7c8b99;
+		--panel-rule: #243240;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme='light']) {
+			--ground: #0c1116;
+			--surface: #131a22;
+			--surface-2: #19232d;
+			--ink: #e3e9ef;
+			--ink-2: #98a5b3;
+			--ink-3: #6e7c8a;
+			--rule: #26313d;
+			--rule-soft: #1d2731;
+			--accent: #7fafe8;
+			--accent-2: #a3c7f2;
+			--accent-soft: #15263a;
+			--ok: #54c08d;
+			--ok-soft: #12291f;
+			--warn: #d6a247;
+			--warn-soft: #2a2113;
+			--stop: #e88178;
+			--stop-soft: #2e1917;
+			--panel: #080c11;
+			--panel-2: #111a22;
+		}
+	}
+	:root[data-theme='dark'] {
+		--ground: #0c1116;
+		--surface: #131a22;
+		--surface-2: #19232d;
+		--ink: #e3e9ef;
+		--ink-2: #98a5b3;
+		--ink-3: #6e7c8a;
+		--rule: #26313d;
+		--rule-soft: #1d2731;
+		--accent: #7fafe8;
+		--accent-2: #a3c7f2;
+		--accent-soft: #15263a;
+		--ok: #54c08d;
+		--ok-soft: #12291f;
+		--warn: #d6a247;
+		--warn-soft: #2a2113;
+		--stop: #e88178;
+		--stop-soft: #2e1917;
+		--panel: #080c11;
+		--panel-2: #111a22;
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+	body {
+		margin: 0;
+		background: var(--ground);
+		color: var(--ink);
+		font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+		font-size: 16px;
+		line-height: 1.62;
+		-webkit-font-smoothing: antialiased;
+	}
+
+	.shell {
+		display: grid;
+		grid-template-columns: 1fr;
+		max-width: 1320px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+	@media (min-width: 1100px) {
+		.shell {
+			grid-template-columns: 236px minmax(0, 1fr);
+			gap: 56px;
+			padding: 0 40px 120px;
+		}
+	}
+
+	.masthead {
+		grid-column: 1/-1;
+		border-bottom: 2px solid var(--ink);
+		padding: 56px 0 22px;
+		margin-bottom: 36px;
+	}
+	.mast-tag {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 11px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--accent);
+		margin-bottom: 18px;
+	}
+	.mast-title {
+		font-family: 'Oswald', 'Arial Narrow', sans-serif;
+		font-weight: 500;
+		font-size: clamp(52px, 10vw, 104px);
+		line-height: 0.92;
+		letter-spacing: 0.02em;
+		margin: 0 0 14px;
+		text-wrap: balance;
+	}
+	.mast-sub {
+		font-size: clamp(17px, 2.2vw, 21px);
+		line-height: 1.4;
+		color: var(--ink-2);
+		max-width: 34ch;
+		margin: 0 0 30px;
+	}
+	.mast-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 34px;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 12px;
+		color: var(--ink-3);
+	}
+	.mast-meta b {
+		color: var(--ink);
+		font-weight: 500;
+	}
+
+	.changelog {
+		grid-column: 1/-1;
+		border-left: 3px solid var(--accent);
+		background: var(--accent-soft);
+		padding: 16px 20px;
+		margin-bottom: 44px;
+		font-size: 14.5px;
+		line-height: 1.55;
+	}
+	.changelog b {
+		display: block;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 10.5px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--accent);
+		margin-bottom: 8px;
+	}
+
+	.stats {
+		grid-column: 1/-1;
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 1px;
+		background: var(--rule);
+		border: 1px solid var(--rule);
+		margin-bottom: 56px;
+	}
+	@media (min-width: 720px) {
+		.stats {
+			grid-template-columns: repeat(4, 1fr);
+		}
+	}
+	.stat {
+		background: var(--surface);
+		padding: 20px 22px;
+	}
+	.stat-n {
+		font-family: 'Oswald', 'Arial Narrow', sans-serif;
+		font-size: 38px;
+		font-weight: 400;
+		line-height: 1;
+		font-variant-numeric: tabular-nums;
+		margin-bottom: 6px;
+	}
+	.stat-l {
+		font-size: 12px;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink-3);
+	}
+
+	.rail {
+		display: none;
+	}
+	@media (min-width: 1100px) {
+		.rail {
+			display: block;
+			align-self: start;
+			position: sticky;
+			top: 32px;
+			max-height: calc(100vh - 64px);
+			overflow-y: auto;
+			padding-bottom: 24px;
+		}
+	}
+	.rail-h {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 10px;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--ink-3);
+		padding-bottom: 10px;
+		margin-bottom: 12px;
+		border-bottom: 1px solid var(--rule);
+	}
+	.rail a {
+		display: block;
+		color: var(--ink-2);
+		text-decoration: none;
+		font-size: 13.5px;
+		line-height: 1.35;
+		padding: 5px 0 5px 12px;
+		border-left: 2px solid transparent;
+	}
+	.rail a:hover {
+		color: var(--accent);
+		border-left-color: var(--accent);
+	}
+	.rail a:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+	.rail a.sub {
+		padding-left: 22px;
+		font-size: 12.5px;
+		color: var(--ink-3);
+		font-family: 'IBM Plex Mono', monospace;
+	}
+	.rail a.key {
+		color: var(--ink);
+		font-weight: 600;
+	}
+	.rail .gap {
+		height: 14px;
+	}
+
+	main {
+		min-width: 0;
+	}
+	section {
+		margin-bottom: 76px;
+		scroll-margin-top: 24px;
+	}
+	h2 {
+		font-family: 'Oswald', 'Arial Narrow', sans-serif;
+		font-weight: 400;
+		font-size: clamp(28px, 4vw, 40px);
+		line-height: 1.1;
+		letter-spacing: 0.01em;
+		margin: 0 0 8px;
+		text-wrap: balance;
+	}
+	.sec-num {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 11px;
+		letter-spacing: 0.18em;
+		color: var(--accent);
+		display: block;
+		margin-bottom: 12px;
+	}
+	.lede {
+		font-size: 17.5px;
+		color: var(--ink-2);
+		max-width: 66ch;
+		margin: 0 0 32px;
+	}
+	h3 {
+		font-family: 'Oswald', 'Arial Narrow', sans-serif;
+		font-weight: 500;
+		font-size: 22px;
+		letter-spacing: 0.01em;
+		margin: 44px 0 14px;
+		padding-top: 20px;
+		border-top: 1px solid var(--rule);
+		scroll-margin-top: 24px;
+	}
+	h3:first-of-type {
+		margin-top: 0;
+		border-top: none;
+		padding-top: 0;
+	}
+	h3 .code {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 13px;
+		color: var(--accent);
+		letter-spacing: 0;
+		margin-right: 10px;
+		font-weight: 500;
+	}
+	h4 {
+		font-size: 13px;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--ink-3);
+		font-weight: 600;
+		margin: 28px 0 12px;
+	}
+	p {
+		max-width: 68ch;
+		margin: 0 0 16px;
+	}
+	ul,
+	ol {
+		max-width: 68ch;
+		padding-left: 22px;
+		margin: 0 0 18px;
+	}
+	li {
+		margin-bottom: 8px;
+	}
+	strong {
+		font-weight: 600;
+		color: var(--ink);
+	}
+	a {
+		color: var(--accent);
+	}
+	code,
+	.mono {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.88em;
+	}
+	code {
+		background: var(--surface-2);
+		padding: 1px 5px;
+		border-radius: 3px;
+	}
+
+	.tw {
+		overflow-x: auto;
+		margin: 0 0 24px;
+		border: 1px solid var(--rule);
+		background: var(--surface);
+	}
+	table {
+		border-collapse: collapse;
+		width: 100%;
+		font-size: 14.5px;
+		min-width: 520px;
+	}
+	th {
+		text-align: left;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 10.5px;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		font-weight: 500;
+		color: var(--ink-3);
+		padding: 11px 16px;
+		border-bottom: 1px solid var(--rule);
+		background: var(--surface-2);
+		white-space: nowrap;
+	}
+	td {
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--rule-soft);
+		vertical-align: top;
+		line-height: 1.5;
+	}
+	tr:last-child td {
+		border-bottom: none;
+	}
+	.rid {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 12.5px;
+		color: var(--ink-2);
+		white-space: nowrap;
+		font-variant-numeric: tabular-nums;
+	}
+	.ph {
+		white-space: nowrap;
+		width: 1%;
+	}
+	.matrix td:not(:first-child) {
+		text-align: center;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 12.5px;
+	}
+	.matrix th:not(:first-child) {
+		text-align: center;
+	}
+
+	.chip {
+		display: inline-block;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 10.5px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		padding: 3px 8px;
+		border: 1px solid var(--rule);
+		color: var(--ink-3);
+		white-space: nowrap;
+	}
+	.chip.mvp {
+		background: var(--accent);
+		border-color: var(--accent);
+		color: #fff;
+		font-weight: 500;
+	}
+	:root[data-theme='dark'] .chip.mvp {
+		color: #0c1116;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme='light']) .chip.mvp {
+			color: #0c1116;
+		}
+	}
+	.chip.p2 {
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+	.chip.p3 {
+		border-color: var(--ink-3);
+		color: var(--ink-2);
+	}
+	.chip.p4 {
+		border-style: dashed;
+		border-color: var(--ink-3);
+		color: var(--ink-3);
+	}
+	.chip.no {
+		background: var(--stop-soft);
+		border-color: var(--stop);
+		color: var(--stop);
+	}
+	.lv {
+		display: inline-block;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 10.5px;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		padding: 2px 7px;
+		white-space: nowrap;
+		border: 1px solid;
+	}
+	.lv.c {
+		color: var(--stop);
+		border-color: var(--stop);
+		background: var(--stop-soft);
+	}
+	.lv.s {
+		color: var(--warn);
+		border-color: var(--warn);
+		background: var(--warn-soft);
+	}
+	.lv.i {
+		color: var(--ink-2);
+		border-color: var(--rule);
+		background: var(--surface-2);
+	}
+
+	.note {
+		border-left: 3px solid var(--accent);
+		background: var(--accent-soft);
+		padding: 16px 20px;
+		margin: 0 0 24px;
+		max-width: 68ch;
+	}
+	.note p:last-child {
+		margin-bottom: 0;
+	}
+	.note.warn {
+		border-left-color: var(--warn);
+		background: var(--warn-soft);
+	}
+	.note.stop {
+		border-left-color: var(--stop);
+		background: var(--stop-soft);
+	}
+
+	.tenet {
+		border: 1px solid var(--rule);
+		background: var(--surface);
+		padding: 22px 24px;
+		margin: 0 0 18px;
+		max-width: none;
+	}
+	.tenet h5 {
+		font-family: 'Oswald', 'Arial Narrow', sans-serif;
+		font-size: 19px;
+		font-weight: 500;
+		margin: 0 0 8px;
+		letter-spacing: 0.01em;
+	}
+	.tenet p {
+		margin: 0;
+		color: var(--ink-2);
+		max-width: 72ch;
+	}
+
+	/* annunciator */
+	.annun {
+		background: var(--panel);
+		border: 1px solid var(--panel-rule);
+		padding: 26px 26px 20px;
+		margin: 0 0 26px;
+		color: var(--panel-ink);
+	}
+	.annun-h {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 16px;
+		flex-wrap: wrap;
+		border-bottom: 1px solid var(--panel-rule);
+		padding-bottom: 14px;
+		margin-bottom: 18px;
+	}
+	.annun-t {
+		font-family: 'Oswald', 'Arial Narrow', sans-serif;
+		font-size: 19px;
+		font-weight: 500;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: #f0f5fa;
+		margin: 0;
+	}
+	.annun-s {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 11px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--panel-ink-2);
+	}
+	.lamps {
+		display: grid;
+		gap: 1px;
+		background: var(--panel-rule);
+		border: 1px solid var(--panel-rule);
+	}
+	@media (min-width: 800px) {
+		.lamps {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+	.lamp {
+		background: var(--panel-2);
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		padding: 11px 14px;
+		font-size: 13.5px;
+		line-height: 1.45;
+	}
+	.bulb {
+		width: 9px;
+		height: 9px;
+		border-radius: 50%;
+		flex: 0 0 auto;
+		margin-top: 6px;
+	}
+	.bulb.c {
+		background: #e0483c;
+		box-shadow: 0 0 0 3px rgba(224, 72, 60, 0.16);
+	}
+	.bulb.s {
+		background: #e2a33c;
+		box-shadow: 0 0 0 3px rgba(226, 163, 60, 0.16);
+	}
+	.bulb.i {
+		background: #5e6e7c;
+		box-shadow: 0 0 0 3px rgba(94, 110, 124, 0.16);
+	}
+	.lamp .id {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 11px;
+		color: var(--panel-ink-2);
+		display: block;
+		margin-bottom: 2px;
+		letter-spacing: 0.05em;
+	}
+	.annun-f {
+		margin-top: 18px;
+		padding-top: 14px;
+		border-top: 1px solid var(--panel-rule);
+		font-size: 13.5px;
+		color: var(--panel-ink-2);
+	}
+	.annun-f strong {
+		color: #f0f5fa;
+	}
+	.annun-f p {
+		max-width: none;
+		margin: 0 0 8px;
+	}
+	.annun-f p:last-child {
+		margin: 0;
+	}
+	.annun-lead {
+		background: #1a1210;
+		border: 1px solid #4a2a22;
+		padding: 14px 16px;
+		margin-bottom: 18px;
+		color: #f5c9c0;
+		font-size: 14px;
+		line-height: 1.5;
+	}
+	.annun-lead strong {
+		color: #ffe4de;
+	}
+
+	.phases {
+		display: grid;
+		gap: 1px;
+		background: var(--rule);
+		border: 1px solid var(--rule);
+	}
+	.phase {
+		background: var(--surface);
+		padding: 24px 26px;
+	}
+	.phase-h {
+		display: flex;
+		align-items: baseline;
+		gap: 14px;
+		margin-bottom: 12px;
+		flex-wrap: wrap;
+	}
+	.phase-n {
+		font-family: 'Oswald', 'Arial Narrow', sans-serif;
+		font-size: 32px;
+		line-height: 1;
+		color: var(--accent);
+		font-weight: 400;
+		font-variant-numeric: tabular-nums;
+	}
+	.phase-t {
+		font-family: 'Oswald', 'Arial Narrow', sans-serif;
+		font-size: 21px;
+		font-weight: 500;
+		letter-spacing: 0.01em;
+	}
+	.phase-c {
+		margin-bottom: 12px;
+		color: var(--ink-2);
+		max-width: 72ch;
+	}
+	.phase-r {
+		font-size: 14px;
+		color: var(--ink);
+		border-left: 2px solid var(--ok);
+		padding-left: 14px;
+		max-width: 72ch;
+	}
+	.phase-r em {
+		font-style: normal;
+		color: var(--ink-2);
+	}
+
+	.modes {
+		display: grid;
+		gap: 1px;
+		background: var(--rule);
+		border: 1px solid var(--rule);
+		margin-bottom: 24px;
+	}
+	@media (min-width: 760px) {
+		.modes {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+	.mode {
+		background: var(--surface);
+		padding: 24px 26px;
+	}
+	.mode-t {
+		font-family: 'Oswald', 'Arial Narrow', sans-serif;
+		font-size: 21px;
+		font-weight: 500;
+		margin: 0 0 4px;
+	}
+	.mode-p {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 12px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		margin-bottom: 14px;
+	}
+	.mode.self .mode-p {
+		color: var(--ok);
+	}
+	.mode.cloud .mode-p {
+		color: var(--accent);
+	}
+	.mode ul {
+		margin: 0;
+		padding-left: 20px;
+		font-size: 14.5px;
+		color: var(--ink-2);
+	}
+
+	.q {
+		display: grid;
+		gap: 1px;
+		background: var(--rule);
+		border: 1px solid var(--rule);
+		counter-reset: q;
+	}
+	.qi {
+		background: var(--surface);
+		padding: 18px 22px;
+		display: flex;
+		gap: 18px;
+	}
+	.qi::before {
+		counter-increment: q;
+		content: counter(q, decimal-leading-zero);
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 12px;
+		color: var(--accent);
+		flex: 0 0 auto;
+		padding-top: 3px;
+	}
+	.qi div {
+		max-width: 68ch;
+	}
+
+	.foot {
+		grid-column: 1/-1;
+		border-top: 1px solid var(--rule);
+		padding-top: 20px;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 11.5px;
+		color: var(--ink-3);
+		display: flex;
+		justify-content: space-between;
+		gap: 20px;
+		flex-wrap: wrap;
+	}
+</style>
+
+<div class="shell">
+	<header class="masthead">
+		<div class="mast-tag">Требования к системе · Версия 0.2 · Черновик</div>
+		<h1 class="mast-title">ЭКИПАЖ</h1>
+		<p class="mast-sub">
+			Система предполётной подготовки и учёта полётов беспилотных воздушных судов
+		</p>
+		<div class="mast-meta">
+			<span>Дата <b>31.08.2026</b></span>
+			<span>Статус <b>На согласовании</b></span>
+			<span>Документ <b>REQUIREMENTS.md</b></span>
+		</div>
+	</header>
+
+	<div class="changelog">
+		<b>Изменения относительно версии 0.1</b>
+		Система больше не блокирует действия пилота — все проверки носят предупреждающий характер с
+		обязательной фиксацией принятия ответственности (ФТ-9). Убраны допуски пилота по типам БВС.
+		Документы пилота стали необязательными. Приглашение пользователей — по ссылке. Добавлена модель
+		развёртывания в контуре заказчика (ФТ-18). ИИ-анализ переведён на локальные модели с открытой
+		лицензией (ФТ-8). Добавлены документы полёта с офлайн-доступом (ФТ-17) и расширена аналитика
+		(ФТ-15).
+	</div>
+
+	<div class="stats">
+		<div class="stat">
+			<div class="stat-n">234</div>
+			<div class="stat-l">требования</div>
+		</div>
+		<div class="stat">
+			<div class="stat-n">133</div>
+			<div class="stat-l">в составе MVP</div>
+		</div>
+		<div class="stat">
+			<div class="stat-n">13</div>
+			<div class="stat-l">типов предупреждений</div>
+		</div>
+		<div class="stat">
+			<div class="stat-n">0</div>
+			<div class="stat-l">блокировок пилота</div>
+		</div>
+	</div>
+
+	<nav class="rail" aria-label="Содержание">
+		<div class="rail-h">Содержание</div>
+		<a href="#s1">1 · Назначение и принципы</a>
+		<a href="#s2">2 · Роли и права доступа</a>
+		<a href="#s3">3 · Функциональные требования</a>
+		<a class="sub" href="#ft1">ФТ-1 Компания</a>
+		<a class="sub" href="#ft2">ФТ-2 Пользователи</a>
+		<a class="sub" href="#ft3">ФТ-3 Парк БВС</a>
+		<a class="sub" href="#ft4">ФТ-4 Чеклисты</a>
+		<a class="sub" href="#ft5">ФТ-5 Планирование</a>
+		<a class="sub" href="#ft6">ФТ-6 Подготовка</a>
+		<a class="sub" href="#ft7">ФТ-7 Автозаполнение</a>
+		<a class="sub" href="#ft8">ФТ-8 Видео и ИИ</a>
+		<a class="sub key" href="#ft9">ФТ-9 Предупреждения</a>
+		<a class="sub" href="#ft10">ФТ-10 Журнал полётов</a>
+		<a class="sub" href="#ft11">ФТ-11 Аккумуляторы</a>
+		<a class="sub" href="#ft12">ФТ-12 Компоненты и ТО</a>
+		<a class="sub" href="#ft13">ФТ-13 Дефекты</a>
+		<a class="sub" href="#ft14">ФТ-14 Регуляторика</a>
+		<a class="sub" href="#ft15">ФТ-15 Дашборд</a>
+		<a class="sub" href="#ft16">ФТ-16 Отчёты</a>
+		<a class="sub" href="#ft17">ФТ-17 Документы офлайн</a>
+		<a class="sub key" href="#ft18">ФТ-18 Развёртывание</a>
+		<div class="gap"></div>
+		<a href="#s4">4 · Нефункциональные требования</a>
+		<a href="#s5">5 · Технологические решения</a>
+		<a href="#s6">6 · Ограничения и риски</a>
+		<a href="#s7">7 · Этапы разработки</a>
+		<a href="#s8">8 · Открытые вопросы</a>
+	</nav>
+
+	<main>
+		<section id="s1">
+			<span class="sec-num">Раздел 01</span>
+			<h2>Назначение и принципы</h2>
+
+			<h3>Проблема</h3>
+			<p>Предполётная подготовка БВС в организациях ведётся на бумаге или в таблицах. Следствия:</p>
+			<ul>
+				<li>
+					проверка выполняется формально, пункты пропускаются, отметки ставятся задним числом;
+				</li>
+				<li>
+					наработка планера, моторов и циклы аккумуляторов не считаются — регламентное обслуживание
+					делается «на глаз»;
+				</li>
+				<li>дефект, замеченный в прошлом вылете, теряется и не всплывает перед следующим;</li>
+				<li>
+					сведение налёта по пилотам и бортам для отчётности — ручная работа на несколько часов;
+				</li>
+				<li>
+					нет доказательной базы: при разборе инцидента невозможно подтвердить, что проверка
+					проводилась.
+				</li>
+			</ul>
+
+			<h3>Цель</h3>
+			<p>
+				Единая система, в которой предполётная подготовка выполняется по чеклисту, все выявленные
+				несоответствия фиксируются вместе с решением пилота, а результат автоматически наполняет
+				журнал налёта и запускает учёт ресурса.
+			</p>
+
+			<h3>Ключевые принципы</h3>
+			<div class="tenet">
+				<h5>Данные вводятся один раз и в момент их возникновения</h5>
+				<p>
+					Всё, что можно определить автоматически — координаты, время, погода, пилот, борт,
+					наработка, — система заполняет сама. Человек подтверждает и вводит только то, что требует
+					его суждения.
+				</p>
+			</div>
+			<div class="tenet">
+				<h5>Система предупреждает, но не запрещает</h5>
+				<p>
+					Ни одна проверка не блокирует действия пилота. Выявленное несоответствие показывается,
+					требует явного принятия ответственности и сохраняется неизменяемой записью. Решение о
+					вылете принимает человек; задача системы — сделать это решение осознанным и
+					прослеживаемым.
+				</p>
+			</div>
+			<div class="tenet">
+				<h5>Данные принадлежат компании</h5>
+				<p>
+					Организация вправе развернуть систему в собственном контуре. Облачный вариант — удобство,
+					а не условие работы.
+				</p>
+			</div>
+
+			<h3>Глоссарий</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>Термин</th>
+							<th>Значение</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">БВС</td>
+							<td>Беспилотное воздушное судно</td>
+						</tr>
+						<tr>
+							<td class="rid">ВС</td>
+							<td>Внешний пилот — лицо, управляющее БВС</td>
+						</tr>
+						<tr>
+							<td class="rid">ИВП</td>
+							<td>Использование воздушного пространства</td>
+						</tr>
+						<tr>
+							<td class="rid">СППИ</td>
+							<td>Система подачи планов полётов и сообщений (портал ИВП)</td>
+						</tr>
+						<tr>
+							<td class="rid">Учётный номер</td>
+							<td>Номер, присвоенный БВС при постановке на учёт в Росавиации</td>
+						</tr>
+						<tr>
+							<td class="rid">Наработка</td>
+							<td>Суммарное время работы борта или агрегата, в часах</td>
+						</tr>
+						<tr>
+							<td class="rid">Предупреждение</td>
+							<td>Выявленное системой несоответствие; не запрещает действие</td>
+						</tr>
+						<tr>
+							<td class="rid">Принятие ответственности</td>
+							<td>Подтверждение пилотом решения выполнить полёт при наличии предупреждений</td>
+						</tr>
+						<tr>
+							<td class="rid">Чеклист</td>
+							<td>Перечень пунктов предполётной проверки, привязанный к конкретному БВС</td>
+						</tr>
+						<tr>
+							<td class="rid">Прохождение</td>
+							<td>Заполненный экземпляр чеклиста для конкретного полёта</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<section id="s2">
+			<span class="sec-num">Раздел 02</span>
+			<h2>Роли и права доступа</h2>
+			<p class="lede">
+				Система многоарендная: данные компаний полностью изолированы друг от друга. Один
+				пользователь может иметь несколько ролей; роли назначаются в пределах компании.
+			</p>
+
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>Роль</th>
+							<th>Зона ответственности</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><strong>Владелец компании</strong></td>
+							<td>Регистрация компании, режим развёртывания, тариф, назначение администраторов</td>
+						</tr>
+						<tr>
+							<td><strong>Администратор</strong></td>
+							<td>Учёт БВС, регуляторная часть, пользователи, дашборд, отчётность</td>
+						</tr>
+						<tr>
+							<td><strong>Пилот</strong></td>
+							<td>
+								Планирование полётов, предполётная подготовка, журнал полётов. Доступ ко всему парку
+								компании
+							</td>
+						</tr>
+						<tr>
+							<td><strong>Техник</strong></td>
+							<td>Состояние парка, аккумуляторы, компоненты, ТО, устранение дефектов</td>
+						</tr>
+						<tr>
+							<td><strong>Наблюдатель</strong></td>
+							<td>Просмотр без права изменения — руководство, аудитор, страховая</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="note">
+				<p>
+					<strong>Роль пилота не содержит ограничений по типам БВС.</strong> Любой пилот компании
+					может запланировать полёт на любом борту парка.
+				</p>
+			</div>
+
+			<h4>Матрица прав</h4>
+			<div class="tw">
+				<table class="matrix">
+					<thead>
+						<tr>
+							<th>Объект</th>
+							<th>Владелец</th>
+							<th>Админ</th>
+							<th>Пилот</th>
+							<th>Техник</th>
+							<th>Наблюдатель</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Компания, тариф, режим развёртывания</td>
+							<td>CRUD</td>
+							<td>R</td>
+							<td>—</td>
+							<td>—</td>
+							<td>—</td>
+						</tr>
+						<tr>
+							<td>Пользователи и роли</td>
+							<td>CRUD</td>
+							<td>CRUD</td>
+							<td>R</td>
+							<td>R</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Карточка БВС</td>
+							<td>R</td>
+							<td>CRUD</td>
+							<td>R</td>
+							<td>RU¹</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Учётный номер, регистрация</td>
+							<td>R</td>
+							<td>CRUD</td>
+							<td>R</td>
+							<td>R</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Чеклист БВС</td>
+							<td>R</td>
+							<td>CRUD</td>
+							<td>R</td>
+							<td>CRUD</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>План полёта</td>
+							<td>R</td>
+							<td>RUD</td>
+							<td>CRUD²</td>
+							<td>R</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Прохождение чеклиста</td>
+							<td>R</td>
+							<td>R</td>
+							<td>C³</td>
+							<td>C³</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Документы полёта</td>
+							<td>R</td>
+							<td>CRUD</td>
+							<td>CRUD²</td>
+							<td>R</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Запись полёта</td>
+							<td>R</td>
+							<td>RU</td>
+							<td>CRU²</td>
+							<td>R</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Принятие ответственности</td>
+							<td>R</td>
+							<td>R</td>
+							<td>C³</td>
+							<td>C³</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Аккумуляторы</td>
+							<td>R</td>
+							<td>R</td>
+							<td>R⁴</td>
+							<td>CRUD</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Компоненты, ТО</td>
+							<td>R</td>
+							<td>R</td>
+							<td>R</td>
+							<td>CRUD</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Дефекты</td>
+							<td>R</td>
+							<td>RU</td>
+							<td>CR</td>
+							<td>CRUD</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Разрешения на ИВП</td>
+							<td>R</td>
+							<td>CRUD</td>
+							<td>R</td>
+							<td>—</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Дашборд</td>
+							<td>R</td>
+							<td>R</td>
+							<td>R⁵</td>
+							<td>R⁵</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Отчёты и выгрузки</td>
+							<td>R</td>
+							<td>R</td>
+							<td>R⁵</td>
+							<td>R⁵</td>
+							<td>R</td>
+						</tr>
+						<tr>
+							<td>Журнал аудита</td>
+							<td>R</td>
+							<td>R</td>
+							<td>—</td>
+							<td>—</td>
+							<td>—</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<ul style="font-size: 14px; color: var(--ink-2)">
+				<li>
+					<span class="mono">¹</span> Техник меняет техническое состояние и статус годности, но не
+					регистрационные данные.
+				</li>
+				<li><span class="mono">²</span> Пилот работает только со своими планами и полётами.</li>
+				<li><span class="mono">³</span> Запись после подписания неизменяема — ФТ-6.9, ФТ-9.8.</li>
+				<li>
+					<span class="mono">⁴</span> Пилот видит аккумуляторы и выбирает их для полёта, но не
+					редактирует карточки.
+				</li>
+				<li>
+					<span class="mono">⁵</span> Ограниченный срез: пилот видит свою статистику, техник —
+					техническую.
+				</li>
+			</ul>
+		</section>
+
+		<section id="s3">
+			<span class="sec-num">Раздел 03</span>
+			<h2>Функциональные требования</h2>
+			<p class="lede">
+				Каждое требование имеет идентификатор и отнесено к этапу. Обозначения:
+				<span class="chip mvp">MVP</span> <span class="chip p2">Фаза 2</span>
+				<span class="chip p3">Фаза 3</span> <span class="chip p4">Фаза 4</span>
+				<span class="chip no">не реализуется</span>
+			</p>
+
+			<h3 id="ft1"><span class="code">ФТ-1</span>Компания</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-1.1</td>
+							<td>
+								Регистрация компании: наименование, ИНН, ОГРН, юридический адрес, контактное лицо
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-1.2</td>
+							<td>
+								<strong>Приглашение пользователей по ссылке.</strong> Администратор создаёт
+								приглашение с выбранной ролью и получает ссылку, которую передаёт любым удобным
+								способом
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-1.3</td>
+							<td>
+								Параметры приглашения: срок действия (по умолчанию 7 дней), ограничение по числу
+								использований — одноразовое либо многоразовое
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-1.4</td>
+							<td>
+								Многоразовая ссылка для массового набора: все перешедшие получают одну роль и
+								попадают в список на подтверждение администратором
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-1.5</td>
+							<td>
+								Отзыв ссылки в любой момент; перечень активных приглашений с числом использований
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-1.6</td>
+							<td>
+								При переходе по ссылке пользователь указывает ФИО и задаёт пароль. Электронная почта
+								необязательна
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-1.7</td>
+							<td>Полная изоляция данных между компаниями на уровне запросов к БД</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-1.8</td>
+							<td>Настройки компании: часовой пояс, единицы измерения, пороги предупреждений</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-1.9</td>
+							<td>Деактивация пользователя с сохранением его исторических записей</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-1.10</td>
+							<td>Журнал аудита: кто, что и когда изменил, с прежним и новым значением</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft2"><span class="code">ФТ-2</span>Пользователи и документы</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-2.1</td>
+							<td>Карточка пользователя: ФИО, должность, контакты, роли</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-2.2</td>
+							<td>
+								<strong>Документы пилота необязательны.</strong> Свидетельство внешнего пилота,
+								аттестации, медицинское заключение — опциональные поля. Отсутствие любого из них не
+								влияет на работу
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-2.3</td>
+							<td>
+								Пилот может загрузить и хранить произвольные документы: свидетельство, страховой
+								полис, допуски, справки. Тип выбирается из списка или задаётся свободно
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-2.4</td>
+							<td>
+								Для документа со сроком действия — предупреждение об истечении за настраиваемое
+								число дней. Не ограничивает работу
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-2.5</td>
+							<td>
+								Пилот имеет доступ ко всему парку компании. Ограничения по типам БВС отсутствуют
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-2.6</td>
+							<td>
+								Аутентификация по логину и паролю; двухфакторная аутентификация опциональна и
+								включается пользователем
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft3"><span class="code">ФТ-3</span>Парк БВС</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-3.1</td>
+							<td>
+								Карточка БВС: тип, производитель, модель, серийный номер, год выпуска, максимальная
+								взлётная масса
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-3.2</td>
+							<td>
+								Учётный номер Росавиации, дата постановки на учёт, скан свидетельства — поля
+								необязательные
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-3.3</td>
+							<td>Статус годности: годен / ограниченно годен / в ремонте / на хранении / списан</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-3.4</td>
+							<td>
+								Наработка: суммарные часы налёта и число полётов, пересчитываются автоматически из
+								журнала
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-3.5</td>
+							<td>Фотографии борта и прикреплённые документы — паспорт, страховой полис, акты</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-3.6</td>
+							<td>История изменений статуса с указанием причины и автора</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-3.7</td>
+							<td>
+								Эксплуатационные ограничения: предельный ветер, диапазон температур, максимальная
+								высота — используются при формировании предупреждений
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-3.8</td>
+							<td>Комплектация: перечень штатных аккумуляторов, пультов, полезной нагрузки</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-3.9</td>
+							<td>Списание борта с сохранением всей истории в архиве</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft4"><span class="code">ФТ-4</span>Чеклисты</h3>
+			<p>Чеклист — основной инструмент системы. Каждый БВС имеет собственный чеклист.</p>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-4.1</td>
+							<td>Чеклист привязан к конкретному БВС. У каждого борта свой чеклист</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.2</td>
+							<td>
+								Библиотека шаблонов: чеклист можно создать на уровне модели БВС и применить ко всем
+								бортам этой модели
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.3</td>
+							<td>
+								Унаследованный от шаблона чеклист редактируется на уровне конкретного борта —
+								переопределение не затрагивает другие борта
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.4</td>
+							<td>
+								Редактор доступен администратору и технику: добавление, удаление, переименование,
+								изменение порядка пунктов
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.5</td>
+							<td>
+								Группировка пунктов по секциям: планер, силовая установка, питание, связь, полезная
+								нагрузка, площадка
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.6</td>
+							<td>
+								Типы пунктов: <strong>да/нет</strong>,
+								<strong>числовое значение с допустимым диапазоном</strong>,
+								<strong>выбор из списка</strong>, <strong>свободный текст</strong>,
+								<strong>фотофиксация</strong>, <strong>подпись</strong>
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.7</td>
+							<td>
+								<strong>Уровень пункта:</strong> критический / существенный / информационный.
+								Определяет уровень предупреждения при отрицательном результате. Ни один уровень не
+								запрещает вылет
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.8</td>
+							<td>
+								Признак «ожидается заполнение». Незаполненный пункт порождает предупреждение, но не
+								препятствует завершению прохождения
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.9</td>
+							<td>Подсказка к пункту: текст, схема или фотоэталон, показываемые пилоту</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.10</td>
+							<td>
+								<strong>Версионирование.</strong> Изменение чеклиста создаёт новую версию. Ранее
+								выполненные прохождения продолжают ссылаться на ту версию, по которой выполнялись.
+								Правка чеклиста никогда не изменяет историю
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.11</td>
+							<td>Просмотр истории версий чеклиста с указанием автора и даты изменения</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.12</td>
+							<td>Импорт и экспорт чеклиста в файл для переноса между компаниями</td>
+							<td class="ph"><span class="chip p3">Фаза 3</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-4.13</td>
+							<td>
+								Срок актуальности прохождения, по умолчанию 60 минут. По истечении выводится
+								предупреждение о давности проверки
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft5"><span class="code">ФТ-5</span>Планирование полёта</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-5.1</td>
+							<td>
+								Создание плана: дата и время, БВС, пилот, площадка, задача, планируемая
+								продолжительность, максимальная высота
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-5.2</td>
+							<td>
+								<strong
+									>В момент создания плана к нему жёстко привязывается действующая версия чеклиста
+									выбранного БВС.</strong
+								>
+								Предполётная подготовка выполняется по этому чеклисту
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-5.3</td>
+							<td>
+								Если чеклист борта изменится после создания плана, план сохранит привязанную версию.
+								Система предупредит о наличии более новой редакции и предложит обновить план
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-5.4</td>
+							<td>Указание площадки: выбор из справочника либо ввод координат на карте</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-5.5</td>
+							<td>
+								Справочник площадок: наименование, координаты, границы, описание подхода,
+								особенности, контакты
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-5.6</td>
+							<td>Привязка плана к разрешению на ИВП и к плану полёта СППИ</td>
+							<td class="ph"><span class="chip p3">Фаза 3</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-5.7</td>
+							<td>
+								Статусы плана: черновик → запланирован → подготовка пройдена → выполняется →
+								завершён / отменён
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-5.8</td>
+							<td>
+								Информирование о пересечении: борт или пилот заняты в другом плане на пересекающийся
+								интервал. Носит предупреждающий характер
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-5.9</td>
+							<td>Планирование серии однотипных полётов — повторяющийся план</td>
+							<td class="ph"><span class="chip p3">Фаза 3</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-5.10</td>
+							<td>Уведомление пилоту о назначенном на него плане</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft6"><span class="code">ФТ-6</span>Предполётная подготовка — ручное заполнение</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-6.1</td>
+							<td>Прохождение открывается из плана полёта по привязанному к нему чеклисту</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.2</td>
+							<td>
+								Пункты предъявляются в порядке, заданном чеклистом. Пилот вправе перейти к любому
+								пункту и вернуться назад
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.3</td>
+							<td>
+								Прохождение можно завершить при любом числе незаполненных пунктов. Каждый
+								незаполненный пункт порождает предупреждение
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.4</td>
+							<td>
+								Отрицательный результат по пункту предлагает создать дефект. Создание необязательно;
+								отказ фиксируется
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.5</td>
+							<td>
+								Числовой пункт с выходом за допустимый диапазон подсвечивается и предлагает ввести
+								комментарий
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.6</td>
+							<td>
+								К любому пункту можно приложить фотографию и комментарий, даже если это не требуется
+								чеклистом
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.7</td>
+							<td>
+								Прогресс сохраняется непрерывно. Прерывание работы не приводит к потере введённых
+								данных
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.8</td>
+							<td>
+								Завершение — явное подтверждение пилотом с фиксацией ФИО, даты, времени и координат
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.9</td>
+							<td>
+								<strong>Подписанное прохождение неизменяемо.</strong> Исправление возможно только
+								новым прохождением; прежнее сохраняется с пометкой о причине аннулирования
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.10</td>
+							<td>
+								Перед подписанием выводится сводка: заполнено пунктов, пропущено, отрицательных
+								результатов, сформировано предупреждений
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.11</td>
+							<td>
+								Отображение результатов предыдущего прохождения по этому борту с выделением отличий
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.12</td>
+							<td>Незакрытые дефекты борта выводятся перед началом прохождения</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-6.13</td>
+							<td>Фиксация фактической длительности прохождения</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft7"><span class="code">ФТ-7</span>Автоматическое заполнение</h3>
+			<p>Максимум данных подставляется системой; пилот подтверждает или корректирует.</p>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th>Источник данных</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-7.1</td>
+							<td>Дата и время начала и окончания подготовки</td>
+							<td>Часы устройства + серверное время</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-7.2</td>
+							<td>Координаты места проведения подготовки</td>
+							<td><code>navigator.geolocation</code> — работает без сети</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-7.3</td>
+							<td>Определение площадки по координатам</td>
+							<td>Сопоставление со справочником площадок</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-7.4</td>
+							<td>Пилот, БВС, задача, привязанные аккумуляторы</td>
+							<td>План полёта</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-7.5</td>
+							<td>Погода: температура, давление, влажность, ветер, порывы, видимость, осадки</td>
+							<td>Метеосервис по координатам и времени</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-7.6</td>
+							<td>Время восхода, захода солнца и гражданских сумерек</td>
+							<td><strong>Вычисляется локально</strong> по координатам и дате — не требует сети</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-7.7</td>
+							<td>Геомагнитная обстановка, Kp-индекс</td>
+							<td>Внешний сервис</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-7.8</td>
+							<td>Наработка борта, циклы аккумуляторов, срок до ближайшего ТО</td>
+							<td>Собственные данные системы</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-7.9</td>
+							<td>
+								Все автозаполненные значения помечаются значком источника и доступны для правки.
+								Факт правки фиксируется
+							</td>
+							<td>—</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-7.10</td>
+							<td>При отсутствии сети погода берётся из кэша с явной отметкой давности данных</td>
+							<td>Кэш подготовки к выезду</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-7.11</td>
+							<td>
+								<strong>Шаблоны ручного ввода.</strong> Пилот сохраняет часто используемые сочетания
+								«площадка + задача + состав экипажа + набор аккумуляторов» как именованный шаблон.
+								Применение заполняет план одним действием
+							</td>
+							<td>—</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-7.12</td>
+							<td>Шаблоны доступны всей компании либо только автору — по выбору при сохранении</td>
+							<td>—</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft8"><span class="code">ФТ-8</span>Видеофиксация и ИИ-анализ</h3>
+			<div class="note">
+				<p>
+					Видеозапись ускоряет заполнение чеклиста. Анализ выполняется
+					<strong>локальными моделями с открытой лицензией</strong>, развёрнутыми на сервере
+					компании. Функция доступна только при наличии подключения к серверу; её отсутствие ни на
+					что не влияет.
+				</p>
+			</div>
+
+			<h4>Запись</h4>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-8.1</td>
+							<td>Запись видео предполётной подготовки с камеры устройства прямо в приложении</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.2</td>
+							<td>
+								Ограничения записи: разрешение 720p, длительность не более 10 минут, размер не более
+								300 МБ
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.3</td>
+							<td>
+								<strong>Голосовое сопровождение.</strong> Пилот проговаривает вслух выполняемые
+								пункты — «пропеллер номер три, трещин нет, люфта нет». Аудиодорожка — основной
+								источник для анализа
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.4</td>
+							<td>
+								Экранная подсказка во время записи: текущий пункт чеклиста и формулировка, которую
+								нужно произнести
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.5</td>
+							<td>Видео записывается и сохраняется локально независимо от наличия сети</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.6</td>
+							<td>Видео можно записать по частям — по одному фрагменту на секцию чеклиста</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.7</td>
+							<td>
+								Видео прикрепляется к прохождению как доказательство независимо от того, был ли
+								выполнен анализ
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h4>Анализ</h4>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-8.8</td>
+							<td>
+								<strong>Анализ доступен только при подключении к серверу.</strong> В офлайне запись
+								сохраняется, анализ выполняется позже — при возвращении в сеть, по команде пилота
+								либо автоматически
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.9</td>
+							<td>
+								Отсутствие сети или отказ анализа никак не влияют на работу: прохождение заполняется
+								вручную
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.10</td>
+							<td>
+								Конвейер: извлечение аудиодорожки → распознавание речи → раскладка транскрипта по
+								пунктам чеклиста → анализ ключевых кадров для визуальных пунктов
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.11</td>
+							<td>
+								В запрос к модели передаётся структура <strong>конкретного</strong> чеклиста этого
+								борта. Модель заполняет именно его пункты
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.12</td>
+							<td>
+								Для каждого пункта возвращается: предлагаемое значение, уверенность 0…1, таймкод в
+								видео, фрагмент транскрипта как обоснование
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.13</td>
+							<td>
+								Автоматически подставляются только значения с уверенностью выше порога. Порог
+								настраивается компанией, по умолчанию 0.8
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.14</td>
+							<td>
+								Каждый подставленный пункт помечается значком. Нажатие перематывает видео на
+								соответствующий момент
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.15</td>
+							<td>
+								<strong>Пилот подтверждает каждый автозаполненный пункт.</strong> Без подтверждения
+								человеком прохождение не считается завершённым
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.16</td>
+							<td>
+								Правки пилота поверх предложений модели сохраняются как метрика качества анализа
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-8.17</td>
+							<td>
+								Очередь анализа с отображением состояния: ожидает / обрабатывается / готово / ошибка
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h4>Локальные модели</h4>
+			<p>
+				Все компоненты — с открытой лицензией, разворачиваются в контуре компании. Ни один фрагмент
+				видео не покидает периметр.
+			</p>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>Компонент</th>
+							<th>Кандидаты</th>
+							<th>Лицензия</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><strong>Распознавание речи (русский)</strong></td>
+							<td>
+								<code>faster-whisper</code> + Whisper large-v3 — основной вариант, лучшее качество
+								на русском. <code>GigaAM</code> (Сбер) — русскоязычная альтернатива.
+								<code>Vosk</code> — лёгкий вариант для CPU
+							</td>
+							<td class="rid">MIT / Apache 2.0</td>
+						</tr>
+						<tr>
+							<td><strong>Раскладка транскрипта по чеклисту</strong></td>
+							<td>
+								<code>Qwen2.5</code> / <code>Qwen3</code> 7–32B, <code>T-lite</code> /
+								<code>T-pro</code> (Т-Банк), <code>Vikhr</code> — русскоязычные открытые модели
+							</td>
+							<td class="rid">Apache 2.0</td>
+						</tr>
+						<tr>
+							<td><strong>Анализ кадров (VLM)</strong></td>
+							<td><code>Qwen2.5-VL</code> 7B/32B, <code>InternVL</code>, <code>MiniCPM-V</code></td>
+							<td class="rid">Apache 2.0</td>
+						</tr>
+						<tr>
+							<td><strong>Сервер инференса</strong></td>
+							<td>
+								<code>vLLM</code> для GPU с батчингом; <code>Ollama</code> /
+								<code>llama.cpp</code> для простого развёртывания
+							</td>
+							<td class="rid">Apache 2.0 / MIT</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="note warn">
+				<p>
+					<strong>Ключевое архитектурное решение.</strong> Русскоязычные открытые VLM заметно слабее
+					в понимании видео, чем в работе с текстом. Поэтому основная нагрузка ложится на
+					распознавание речи, которое на русском работает надёжно: транскрипт раскладывается по
+					пунктам чеклиста текстовой моделью, а VLM применяется только к чисто визуальным пунктам, с
+					пониженным уровнем доверия. Сценарий «пилот проговаривает вслух» — не пожелание, а условие
+					работоспособности функции.
+				</p>
+			</div>
+
+			<p>
+				<strong>Требования к оборудованию.</strong> Минимальная конфигурация — один GPU с 24 ГБ
+				видеопамяти (например RTX 4090). В этот объём помещаются Whisper large-v3 в int8 (~3 ГБ),
+				текстовая модель 7–8B в 4-битном квантовании (~6 ГБ) и VLM 7B в 4-битном квантовании (~6
+				ГБ). Для моделей 32B и выше требуется 48 ГБ и более либо более агрессивное квантование.
+				Пропускная способность и время обработки одной записи подлежат измерению на реальных данных
+				до внедрения.
+			</p>
+
+			<h3 id="ft9"><span class="code">ФТ-9</span>Предупреждения и принятие ответственности</h3>
+			<p>Центральный механизм системы.</p>
+
+			<div class="annun">
+				<div class="annun-lead">
+					<strong>Система не запрещает пилоту никаких действий.</strong> Она выявляет
+					несоответствия, показывает их, требует явного принятия ответственности и сохраняет
+					неотказуемую запись. Решение о вылете принимает человек.
+				</div>
+				<div class="annun-h">
+					<p class="annun-t">Перечень проверок</p>
+					<span class="annun-s">П-01 — П-13 · критическое · существенное · информационное</span>
+				</div>
+				<div class="lamps">
+					<div class="lamp">
+						<span class="bulb s"></span
+						><span
+							><span class="id">П-01 · существенное · MVP</span>У БВС отсутствует учётный
+							номер</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb c"></span
+						><span
+							><span class="id">П-02 · критическое · MVP</span>Статус борта отличен от «годен»</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb c"></span
+						><span
+							><span class="id">П-03 · критическое · MVP</span>По борту есть незакрытый дефект
+							критического уровня</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb s"></span
+						><span
+							><span class="id">П-04 · существенное · Фаза 2</span>Просрочено регламентное
+							обслуживание по наработке или календарю</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb i"></span
+						><span
+							><span class="id">П-05 · информационное · Фаза 2</span>У пилота истёк срок документа,
+							для которого он указан</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb c"></span
+						><span
+							><span class="id">П-06 · критическое · MVP</span>Прохождение чеклиста не выполнено, не
+							подписано либо просрочено</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb c"></span
+						><span
+							><span class="id">П-07 · критическое · MVP</span>В прохождении есть отрицательный
+							результат по критическому пункту</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb s"></span
+						><span
+							><span class="id">П-08 · существенное · MVP</span>В прохождении есть незаполненные
+							пункты</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb s"></span
+						><span
+							><span class="id">П-09 · существенное · Фаза 3</span>Отсутствует или просрочено
+							разрешение на ИВП для района и периода</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb s"></span
+						><span
+							><span class="id">П-10 · существенное · Фаза 2</span>Аккумулятор имеет статус, не
+							предполагающий эксплуатацию</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb c"></span
+						><span
+							><span class="id">П-11 · критическое · Фаза 2</span>Погодные условия выходят за
+							эксплуатационные ограничения БВС</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb s"></span
+						><span
+							><span class="id">П-12 · существенное · Фаза 2</span>Планируемое время выходит за
+							пределы светлого времени суток</span
+						>
+					</div>
+					<div class="lamp">
+						<span class="bulb i"></span
+						><span
+							><span class="id">П-13 · информационное · MVP</span>Борт или пилот заняты в другом
+							плане на пересекающийся интервал</span
+						>
+					</div>
+				</div>
+				<div class="annun-f">
+					<p>
+						<strong>Каждое предупреждение принимается отдельно.</strong> Сводного «принять всё» без
+						раскрытия перечня нет — ФТ-9.7.
+					</p>
+					<p>
+						Уровень влияет на оформление и на отчётность, но никогда не запрещает действие. Компания
+						может переопределить уровень любого типа или отключить его.
+					</p>
+				</div>
+			</div>
+
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-9.1</td>
+							<td>
+								Система непрерывно вычисляет перечень предупреждений по плану полёта и отображает
+								его пилоту
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-9.2</td>
+							<td>
+								Уровни: <span class="lv c">критическое</span> <span class="lv s">существенное</span>
+								<span class="lv i">информационное</span>. Уровень влияет на оформление и отчётность,
+								но никогда не запрещает действие
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-9.3</td>
+							<td>
+								<strong>Ни одно предупреждение не блокирует</strong> создание плана, прохождение
+								чеклиста, вылет или закрытие полёта
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-9.4</td>
+							<td>
+								<strong>Принятие ответственности.</strong> При наличии хотя бы одного предупреждения
+								пилот перед вылетом получает их полный перечень и подтверждает решение выполнить
+								полёт
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-9.5</td>
+							<td>
+								Запись о принятии содержит: ФИО пилота, дата, время, координаты, полный перечень
+								принятых предупреждений в формулировках на момент принятия, версия чеклиста, версия
+								правил
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-9.6</td>
+							<td>
+								Пилот может добавить комментарий с обоснованием решения. Для критических
+								предупреждений комментарий запрашивается, но не является обязательным
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-9.7</td>
+							<td>
+								Каждое предупреждение принимается отдельно — сводного «принять всё» без раскрытия
+								перечня нет
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-9.8</td>
+							<td>Запись о принятии ответственности неизменяема и не может быть удалена</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-9.9</td>
+							<td>
+								Уведомление администратора о полёте, выполненном с принятыми критическими
+								предупреждениями
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-9.10</td>
+							<td>
+								Правила формирования предупреждений реализуются <strong>единым модулем</strong>,
+								исполняемым и на сервере, и в браузере, чтобы офлайн-результат совпадал с серверным
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-9.11</td>
+							<td>
+								Все предупреждения и все принятия ответственности попадают в отчётность и в дашборд
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-9.12</td>
+							<td>
+								Компания может настроить уровень каждого типа предупреждения либо отключить его
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft10"><span class="code">ФТ-10</span>Журнал полётов</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-10.1</td>
+							<td>
+								Запись полёта: дата, БВС, пилот, площадка и координаты, время взлёта и посадки,
+								налёт, задача
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-10.2</td>
+							<td>Время взлёта и посадки фиксируется кнопкой в приложении либо вводится вручную</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-10.3</td>
+							<td>Налёт вычисляется автоматически из времени взлёта и посадки</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-10.4</td>
+							<td>
+								Указание использованных аккумуляторов с автоматическим приращением счётчика циклов
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-10.5</td>
+							<td>
+								Максимальная достигнутая высота, характер полёта — визуальный или за пределами
+								прямой видимости
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-10.6</td>
+							<td>Отметка о происшествии или инциденте с описанием и приложением материалов</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-10.7</td>
+							<td>Ссылка на прохождение чеклиста и на запись о принятии ответственности</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-10.8</td>
+							<td>
+								Перечень предупреждений, действовавших на момент вылета, сохраняется в записи полёта
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-10.9</td>
+							<td>
+								Наработка борта и компонентов увеличивается автоматически при закрытии записи полёта
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-10.10</td>
+							<td>
+								<strong>Журнал только дополняется.</strong> Исправление вносится корректирующей
+								записью с указанием причины и автора; исходная запись сохраняется
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-10.11</td>
+							<td>
+								Фильтрация и поиск по периоду, борту, пилоту, площадке, наличию происшествий и
+								предупреждений
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-10.12</td>
+							<td>Импорт телеметрии полётного контроллера — DJI, PX4, ArduPilot</td>
+							<td class="ph"><span class="chip no">не планируется</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft11"><span class="code">ФТ-11</span>Аккумуляторы</h3>
+			<p>Зона ответственности техника. Аккумуляторы принадлежат парку, а не конкретному борту.</p>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-11.1</td>
+							<td>
+								Карточка АКБ: серийный номер, тип, ёмкость, число банок, дата производства, дата
+								ввода в эксплуатацию
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-11.2</td>
+							<td>
+								Счётчик циклов заряда-разряда, увеличивается автоматически при использовании в
+								полёте
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-11.3</td>
+							<td>Назначенный ресурс в циклах и предупреждение при приближении к пределу</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-11.4</td>
+							<td>Статус: в строю / на хранении / на проверке / выведен из эксплуатации</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-11.5</td>
+							<td>
+								Журнал измерений: напряжение по банкам, разбаланс, внутреннее сопротивление,
+								остаточная ёмкость
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-11.6</td>
+							<td>
+								Контроль хранения: предупреждение о переводе в напряжение хранения после N дней
+								простоя
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-11.7</td>
+							<td>
+								Признаки браковки: вздутие, механическое повреждение, превышение разбаланса, падение
+								ёмкости ниже порога
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-11.8</td>
+							<td>История использования: в каких полётах, на каких бортах, кем</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-11.9</td>
+							<td>
+								Выбор аккумулятора со статусом «выведен из эксплуатации» порождает предупреждение
+								П-10, но остаётся возможным
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft12"><span class="code">ФТ-12</span>Компоненты и обслуживание</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-12.1</td>
+							<td>
+								Учёт агрегатов с ресурсом: планер, моторы, пропеллеры, регуляторы, подвес, полезная
+								нагрузка
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-12.2</td>
+							<td>
+								Наработка компонента считается отдельно от борта и не обнуляется при переустановке
+								на другой борт
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-12.3</td>
+							<td>
+								Назначенный ресурс в часах или циклах, предупреждение при приближении к пределу
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-12.4</td>
+							<td>
+								Регламент ТО: периодичность по наработке или по календарю, дата следующего срока
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-12.5</td>
+							<td>
+								Выполнение работ: вид, дата, исполнитель, заменённые части, отметка о проверке
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-12.6</td>
+							<td>Просроченное ТО порождает предупреждение П-04</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-12.7</td>
+							<td>История установки и снятия компонентов</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft13"><span class="code">ФТ-13</span>Дефекты</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-13.1</td>
+							<td>Создание дефекта из пункта чеклиста, из записи полёта или вручную</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-13.2</td>
+							<td>
+								Уровень: <span class="lv c">критический</span>
+								<span class="lv s">существенный</span> <span class="lv i">информационный</span> —
+								определяет уровень порождаемого предупреждения
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-13.3</td>
+							<td>Привязка к борту либо к конкретному компоненту</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-13.4</td>
+							<td>Описание, фотографии, автор, дата обнаружения</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-13.5</td>
+							<td>Жизненный цикл: открыт → в работе → устранён → проверен и закрыт</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-13.6</td>
+							<td>
+								Закрыть дефект вправе только техник или администратор — не обнаруживший его пилот
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-13.7</td>
+							<td>Открытые дефекты показываются пилоту перед началом предполётной подготовки</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-13.8</td>
+							<td>Уведомление техника о новом критическом дефекте</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft14"><span class="code">ФТ-14</span>Регуляторная часть</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-14.1</td>
+							<td>Хранение учётного номера БВС, даты постановки на учёт, скана свидетельства</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-14.2</td>
+							<td>Отсутствие учётного номера порождает предупреждение П-01</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-14.3</td>
+							<td>
+								Разрешения на ИВП: номер, выдавший орган, район действия, диапазон высот, срок
+								действия, скан документа
+							</td>
+							<td class="ph"><span class="chip p3">Фаза 3</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-14.4</td>
+							<td>
+								Планы полётов СППИ: номер, время подачи, статус, срок действия, привязка к плану
+								полёта
+							</td>
+							<td class="ph"><span class="chip p3">Фаза 3</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-14.5</td>
+							<td>Предупреждение об истечении срока разрешения за настраиваемое число дней</td>
+							<td class="ph"><span class="chip p3">Фаза 3</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-14.6</td>
+							<td>
+								Проверка: планируемая площадка находится в пределах района, указанного в разрешении
+							</td>
+							<td class="ph"><span class="chip p3">Фаза 3</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-14.7</td>
+							<td>Реестр местных ограничений и запретных зон, ведётся администратором вручную</td>
+							<td class="ph"><span class="chip p3">Фаза 3</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-14.8</td>
+							<td>Автоматическая подача планов полётов в СППИ — публичный интерфейс отсутствует</td>
+							<td class="ph"><span class="chip no">не реализуется</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft15"><span class="code">ФТ-15</span>Дашборд и аналитика</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Блок</th>
+							<th>Содержание</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-15.1</td>
+							<td><strong>Состояние парка</strong></td>
+							<td>
+								Число бортов; сколько из них с активными предупреждениями и какого уровня, с
+								раскрытием перечня
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.2</td>
+							<td><strong>Календарь полётов</strong></td>
+							<td>
+								Тепловая карта по дням за год, в манере журнала активности GitHub. Насыщенность
+								ячейки — число полётов за день; цвет — наиболее серьёзный уровень предупреждений
+								этого дня (нейтральный, янтарный, красный). Нажатие открывает перечень полётов дня
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.3</td>
+							<td><strong>Планируемые полёты</strong></td>
+							<td>
+								Список ближайших запланированных полётов: дата и время, борт, пилот, площадка,
+								задача, текущие предупреждения по плану. Сортировка по времени, фильтр по борту и
+								пилоту
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.4</td>
+							<td><strong>Распределение по бортам</strong></td>
+							<td>
+								Круговая диаграмма: доля полётов, приходящаяся на каждый борт за период. При числе
+								бортов свыше восьми — переключение на горизонтальную гистограмму
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.5</td>
+							<td><strong>Распределение по пилотам</strong></td>
+							<td>Круговая диаграмма: доля полётов, выполненных каждым пилотом за период</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.6</td>
+							<td><strong>Предупреждения</strong></td>
+							<td>
+								Число предупреждений за период по уровням и по типам (П-01…П-13); доля полётов,
+								выполненных с принятыми предупреждениями; наиболее частые типы
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.7</td>
+							<td><strong>Налёт</strong></td>
+							<td>
+								Суммарный налёт и число полётов за период; динамика по неделям; разрезы по бортам и
+								по пилотам
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.8</td>
+							<td><strong>Требует внимания</strong></td>
+							<td>
+								Истекающие документы, разрешения, регламентное ТО, ресурс компонентов и
+								аккумуляторов
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.9</td>
+							<td><strong>Открытые дефекты</strong></td>
+							<td>Разбивка по уровням и по бортам, срок нахождения в открытом состоянии</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.10</td>
+							<td><strong>Качество подготовки</strong></td>
+							<td>
+								Средняя длительность прохождения; доля прохождений с пропущенными пунктами; пункты,
+								чаще прочих дающие отрицательный результат
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.11</td>
+							<td><strong>Качество ИИ-анализа</strong></td>
+							<td>
+								Доля автозаполненных пунктов; доля правок пилотом — прямая метрика полезности модели
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.12</td>
+							<td colspan="2">
+								Настраиваемый период для всех блоков: неделя, месяц, квартал, год, произвольный
+								интервал
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-15.13</td>
+							<td colspan="2">Переход из любого показателя дашборда к перечню исходных записей</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft16"><span class="code">ФТ-16</span>Отчёты и выгрузки</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-16.1</td>
+							<td>Журнал полётов за период — XLSX и PDF</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-16.2</td>
+							<td>
+								<strong>Отчёт по предупреждениям</strong>: перечень полётов с предупреждениями за
+								период, с указанием типа и уровня, кто принял ответственность, когда, с каким
+								комментарием
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-16.3</td>
+							<td>
+								Отчёт по предупреждениям в разрезах: по пилоту, по борту, по типу предупреждения
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-16.4</td>
+							<td>Налёт по пилоту за период</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-16.5</td>
+							<td>Налёт и наработка по борту за период</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-16.6</td>
+							<td>
+								Прохождение чеклиста как документ PDF с фотографиями, предупреждениями, записью о
+								принятии ответственности и подписью
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-16.7</td>
+							<td>Реестр парка БВС с учётными номерами и статусами</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-16.8</td>
+							<td>Отчёт по дефектам за период</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-16.9</td>
+							<td>Отчёт по аккумуляторам: циклы, состояние, выведенные из эксплуатации</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-16.10</td>
+							<td>Выгрузка сырых данных в CSV для внешней обработки</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft17"><span class="code">ФТ-17</span>Документы полёта и офлайн-доступ</h3>
+			<p>Пилот должен иметь возможность предъявить документы на площадке, где связи нет.</p>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-17.1</td>
+							<td>
+								К плану полёта прикрепляются произвольные документы: разрешение на ИВП, полётное
+								задание, страховой полис, свидетельство о постановке на учёт, схема района,
+								согласования
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-17.2</td>
+							<td>
+								Поддерживаемые форматы: PDF, JPEG, PNG. Ограничение размера одного файла — 20 МБ
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-17.3</td>
+							<td>Документ снабжается наименованием, типом и, при наличии, сроком действия</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-17.4</td>
+							<td>
+								<strong
+									>Документы прикреплённого плана загружаются в устройство при подготовке к выезду и
+									доступны для просмотра полностью без сети</strong
+								>
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-17.5</td>
+							<td>
+								Встроенный просмотр PDF и изображений без обращения к сети и без выхода из
+								приложения
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-17.6</td>
+							<td>
+								Режим предъявления: документ раскрывается на весь экран с крупным наименованием и
+								сроком действия, пригодный для показа проверяющему
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-17.7</td>
+							<td>
+								Документы уровня компании — лицензии, доверенности, приказы — отмечаются как «всегда
+								доступны офлайн» и кэшируются независимо от плана
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-17.8</td>
+							<td>
+								Индикатор загруженности: сколько документов доступно локально, сколько ожидает
+								загрузки
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-17.9</td>
+							<td>
+								Настройка предельного объёма локального хранилища; при переполнении вытесняются
+								документы завершённых полётов
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-17.10</td>
+							<td>
+								Документы, прикреплённые к борту (ФТ-3.5) и к пилоту (ФТ-2.3), также кэшируются для
+								офлайн-предъявления
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="ft18"><span class="code">ФТ-18</span>Развёртывание и тарификация</h3>
+
+			<div class="modes">
+				<div class="mode self">
+					<p class="mode-t">Собственный контур</p>
+					<p class="mode-p">Без абонентской платы</p>
+					<ul>
+						<li>Приложение, база данных и хранилище на оборудовании компании</li>
+						<li>Данные не покидают периметр организации</li>
+						<li>Вопрос трансграничной передачи персональных данных не возникает</li>
+						<li>Видео и аудио обрабатываются локальными моделями на месте</li>
+						<li>
+							Комплект <code>docker compose</code>, обновление и резервное копирование — силами
+							компании
+						</li>
+					</ul>
+				</div>
+				<div class="mode cloud">
+					<p class="mode-t">Облако</p>
+					<p class="mode-p">Плата по тарифу</p>
+					<ul>
+						<li>Размещение у поставщика, обновления и копии — его зона ответственности</li>
+						<li>Тариф определяется числом бортов и активных пользователей</li>
+						<li>Размещение на территории Российской Федерации</li>
+						<li>ИИ-анализ доступен без собственного оборудования</li>
+						<li>Развёртывание не требуется</li>
+					</ul>
+				</div>
+			</div>
+			<div class="note">
+				<p>
+					<strong>Функциональность обоих режимов идентична.</strong> Различается только размещение
+					данных и порядок оплаты — ФТ-18.4.
+				</p>
+			</div>
+
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+							<th class="ph">Этап</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">ФТ-18.1</td>
+							<td>
+								Поддерживаются два режима: <strong>собственный контур</strong> и
+								<strong>облако</strong>
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-18.2</td>
+							<td>
+								В режиме собственного контура абонентская плата за хранение и обработку данных не
+								взимается
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-18.3</td>
+							<td>
+								В облачном режиме взимается плата по тарифу; параметры определяются числом бортов и
+								активных пользователей
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-18.4</td>
+							<td>
+								Функциональность обоих режимов идентична. Различается только размещение данных и
+								порядок оплаты
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-18.5</td>
+							<td>
+								Развёртывание собственного контура: комплект <code>docker compose</code> с
+								приложением, PostgreSQL, объектным хранилищем и обратным прокси-сервером
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-18.6</td>
+							<td>Автоматическое применение миграций базы данных при обновлении версии</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-18.7</td>
+							<td>
+								Проверка состояния установки: доступность БД, хранилища, применённые миграции,
+								версия
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-18.8</td>
+							<td>
+								Сервис ИИ-анализа — отдельный компонент комплекта, разворачивается по желанию и
+								требует GPU
+							</td>
+							<td class="ph"><span class="chip p4">Фаза 4</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-18.9</td>
+							<td>
+								Резервное копирование и восстановление средствами комплекта, с документированной
+								процедурой
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-18.10</td>
+							<td>
+								Экспорт всех данных компании в переносимый формат — для перехода между режимами в
+								любую сторону
+							</td>
+							<td class="ph"><span class="chip p2">Фаза 2</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-18.11</td>
+							<td>Документация по развёртыванию, обновлению и восстановлению</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+						<tr>
+							<td class="rid">ФТ-18.12</td>
+							<td>
+								Телеметрия установок собственного контура не собирается; проверка обновлений — по
+								явному действию администратора
+							</td>
+							<td class="ph"><span class="chip mvp">MVP</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<section id="s4">
+			<span class="sec-num">Раздел 04</span>
+			<h2>Нефункциональные требования</h2>
+
+			<h3><span class="code">НФТ-1</span>Работа без сети</h3>
+			<div class="note">
+				<p>
+					Предполётная подготовка выполняется на площадке, где связи часто нет. Офлайн — не
+					дополнительная возможность, а условие работоспособности.
+				</p>
+			</div>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">НФТ-1.1</td>
+							<td>
+								Приложение реализуется как PWA: запускается и работает при полном отсутствии сети
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-1.2</td>
+							<td>
+								Локальная база IndexedDB — источник истины в поле. Запись выполняется в неё, не на
+								сервер
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-1.3</td>
+							<td>
+								Очередь исходящих записей с автоматической отправкой при появлении сети. Число
+								неотправленных записей постоянно видно пользователю
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-1.4</td>
+							<td>
+								Идентификаторы записей генерирует клиент (UUIDv7). Сервер устраняет дубликаты по
+								идентификатору — повторная отправка безопасна
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-1.5</td>
+							<td>
+								<strong>Подготовка к выезду</strong>: явное действие, загружающее в устройство парк,
+								пилотов, чеклисты, площадки, погодный прогноз, разрешения и
+								<strong>все документы планов на выбранный период</strong>
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-1.6</td>
+							<td>
+								Правила формирования предупреждений исполняются локально, без обращения к серверу
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-1.7</td>
+							<td>
+								Разрешение конфликтов: прохождения, полёты и принятия ответственности только
+								дополняются, конфликты невозможны. Для изменяемых сущностей — приоритет последней
+								записи по серверному времени; редкий реальный конфликт предъявляется человеку
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-1.8</td>
+							<td>
+								Фотографии сжимаются на устройстве до 1600 px по длинной стороне и отправляются
+								отдельной очередью, после текстовых данных
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-1.9</td>
+							<td>
+								Видеозаписи отправляются в последнюю очередь и только при подключении по Wi-Fi, если
+								иное не указано пользователем
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-1.10</td>
+							<td>
+								<strong>iOS</strong>: приложение должно быть установлено на домашний экран, иначе
+								данные могут быть удалены системой. Онбординг содержит обязательный шаг установки;
+								приложение проверяет режим запуска и предупреждает при работе во вкладке браузера
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-1.11</td>
+							<td>
+								Фоновая доотправка (Background Sync) применяется там, где поддерживается. На iOS
+								синхронизация запускается при открытии приложения
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-1.12</td>
+							<td>
+								Записывается время устройства и время получения сервером; расхождение фиксируется и
+								отображается при разборе
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3><span class="code">НФТ-2</span>Достоверность данных</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">НФТ-2.1</td>
+							<td>
+								Прохождения чеклистов, записи полётов, дефекты и принятия ответственности
+								неизменяемы после подписания; исправление — только корректирующей записью
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-2.2</td>
+							<td>
+								Запись о принятии ответственности сохраняет формулировки предупреждений в том виде,
+								в каком их видел пилот, — последующее изменение правил не меняет исторические записи
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-2.3</td>
+							<td>
+								Полный журнал аудита по всем изменяемым сущностям: автор, время, прежнее и новое
+								значение
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-2.4</td>
+							<td>
+								Версии чеклистов сохраняются вечно; удалить версию, использованную хотя бы в одном
+								прохождении, невозможно
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-2.5</td>
+							<td>Удаление сущностей логическое, а не физическое</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-2.6</td>
+							<td>
+								Прохождение чеклиста экспортируется в самодостаточный PDF, пригодный для
+								предъявления
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3><span class="code">НФТ-3</span>Безопасность</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">НФТ-3.1</td>
+							<td>
+								Разграничение доступа на уровне ролей, проверяемое на сервере при каждом запросе
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-3.2</td>
+							<td>
+								Изоляция данных компаний на уровне доступа к БД; невозможность обращения к чужим
+								данным по прямой ссылке
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-3.3</td>
+							<td>
+								Ссылки-приглашения содержат криптографически стойкий одноразовый токен, имеют срок
+								действия и могут быть отозваны
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-3.4</td>
+							<td>
+								Двухфакторная аутентификация доступна всем пользователям и включается по желанию
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-3.5</td>
+							<td>Шифрование трафика (TLS) и шифрование резервных копий</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-3.6</td>
+							<td>
+								Персональные данные обрабатываются в соответствии с 152-ФЗ. В режиме собственного
+								контура вопрос трансграничной передачи не возникает; в облачном режиме размещение —
+								на территории Российской Федерации
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-3.7</td>
+							<td>Ограничение частоты запросов и защита от подбора паролей</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-3.8</td>
+							<td>
+								Видеозаписи и фотографии доступны только по подписанным ссылкам с ограниченным
+								сроком действия
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-3.9</td>
+							<td>
+								Видео и аудио не покидают контур компании: анализ выполняется локальными моделями на
+								её оборудовании
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3><span class="code">НФТ-4</span>Хранение и производительность</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">НФТ-4.1</td>
+							<td>
+								Открытие любого экрана — не более 2 секунд при устойчивой сети и не более 1 секунды
+								в офлайне
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-4.2</td>
+							<td>Дашборд формируется не дольше 3 секунд на объёме 100 бортов и 50 000 полётов</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-4.3</td>
+							<td>
+								Видео, фотографии и документы хранятся в объектном хранилище, не в базе данных
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-4.4</td>
+							<td>
+								Срок хранения видео настраивается компанией, по умолчанию 12 месяцев. По истечении
+								срока видео удаляется, транскрипт и ключевые кадры сохраняются
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-4.5</td>
+							<td>Ежедневное резервное копирование с хранением копий не менее 30 дней</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-4.6</td>
+							<td>Расчётный объём: 100 бортов, 20 полётов в день, 5 лет истории</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-4.7</td>
+							<td>
+								Минимальная конфигурация для собственного контура без ИИ: 4 ядра, 8 ГБ ОЗУ, 100 ГБ
+								дискового пространства
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3><span class="code">НФТ-5</span>Интерфейс</h3>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Требование</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="rid">НФТ-5.1</td>
+							<td>Экраны предполётной подготовки рассчитаны на смартфон и работу одной рукой</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-5.2</td>
+							<td>Крупные элементы управления, пригодные для работы в перчатках</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-5.3</td>
+							<td>
+								Читаемость при ярком солнечном свете: высокий контраст, светлая тема по умолчанию
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-5.4</td>
+							<td>Экраны учёта, планирования и дашборда рассчитаны на настольный экран</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-5.5</td>
+							<td>
+								Предупреждения оформляются заметно, но не создают ощущения запрета: пилот всегда
+								видит путь дальше
+							</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-5.6</td>
+							<td>Интерфейс на русском языке; архитектура допускает добавление других языков</td>
+						</tr>
+						<tr>
+							<td class="rid">НФТ-5.7</td>
+							<td>
+								Постоянная индикация состояния: онлайн / офлайн, число неотправленных записей,
+								доступность документов офлайн
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<section id="s5">
+			<span class="sec-num">Раздел 05</span>
+			<h2>Технологические решения</h2>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>Слой</th>
+							<th>Решение</th>
+							<th>Обоснование</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Приложение</td>
+							<td><strong>Next.js (App Router) + TypeScript</strong></td>
+							<td>
+								Единый язык на клиенте и сервере — правила предупреждений пишутся один раз (ФТ-9.10)
+							</td>
+						</tr>
+						<tr>
+							<td>База данных</td>
+							<td><strong>PostgreSQL + Drizzle ORM</strong></td>
+							<td>
+								Предметная область строго реляционная; свободная лицензия важна для развёртывания в
+								контуре заказчика
+							</td>
+						</tr>
+						<tr>
+							<td>Офлайн</td>
+							<td>
+								<strong>Serwist</strong> + <strong>Dexie</strong> + собственная очередь отправки
+							</td>
+							<td>Объём записи мал; готовые движки синхронизации избыточны</td>
+						</tr>
+						<tr>
+							<td>Аутентификация</td>
+							<td>Auth.js с ролевой моделью</td>
+							<td>—</td>
+						</tr>
+						<tr>
+							<td>Интерфейс</td>
+							<td>Tailwind CSS + shadcn/ui</td>
+							<td>—</td>
+						</tr>
+						<tr>
+							<td>Диаграммы</td>
+							<td>Recharts либо собственные SVG-компоненты</td>
+							<td>Календарь-тепловая карта реализуется своим компонентом</td>
+						</tr>
+						<tr>
+							<td>Файлы</td>
+							<td><strong>MinIO</strong> (S3-совместимое) — входит в комплект развёртывания</td>
+							<td>Свободная лицензия, работает в закрытом контуре</td>
+						</tr>
+						<tr>
+							<td>Распознавание речи</td>
+							<td><strong>faster-whisper</strong> (Whisper large-v3)</td>
+							<td>MIT, лучшее качество на русском среди открытых</td>
+						</tr>
+						<tr>
+							<td>Раскладка транскрипта</td>
+							<td>Локальная текстовая модель 7–32B с открытой лицензией</td>
+							<td>Основная нагрузка конвейера анализа</td>
+						</tr>
+						<tr>
+							<td>Анализ кадров</td>
+							<td>Локальная VLM (Qwen2.5-VL и аналоги)</td>
+							<td>Только для визуальных пунктов, с пониженным доверием</td>
+						</tr>
+						<tr>
+							<td>Сервер инференса</td>
+							<td>vLLM либо Ollama</td>
+							<td>Выбор по конфигурации оборудования заказчика</td>
+						</tr>
+						<tr>
+							<td>Развёртывание</td>
+							<td><strong>Docker Compose</strong></td>
+							<td>Один комплект для собственного контура и для облака</td>
+						</tr>
+						<tr>
+							<td>Погода</td>
+							<td>Внешний метеосервис по координатам</td>
+							<td>При закрытом контуре — настраиваемый адрес либо ручной ввод</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<section id="s6">
+			<span class="sec-num">Раздел 06</span>
+			<h2>Ограничения и риски</h2>
+			<div class="tw">
+				<table>
+					<thead>
+						<tr>
+							<th>Риск</th>
+							<th>Оценка</th>
+							<th>Мера</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								<strong>Отсутствие блокировок обесценивает предупреждения</strong> — пилоты примут
+								ответственность не читая
+							</td>
+							<td style="color: var(--stop); font-weight: 600; white-space: nowrap">Высокий</td>
+							<td>
+								Каждое предупреждение принимается отдельно, сводного «принять всё» нет; уведомление
+								администратора о критических; отчёт по предупреждениям в разрезе пилотов делает
+								практику видимой руководству
+							</td>
+						</tr>
+						<tr>
+							<td><strong>Качество локальных моделей на русском</strong> ниже коммерческих</td>
+							<td style="color: var(--stop); font-weight: 600; white-space: nowrap">Высокий</td>
+							<td>
+								Ставка на распознавание речи, а не на понимание видео; порог уверенности;
+								обязательное подтверждение каждого пункта пилотом; выбор моделей по результатам
+								замеров на реальных записях
+							</td>
+						</tr>
+						<tr>
+							<td><strong>Стоимость и наличие GPU</strong> у заказчика</td>
+							<td style="color: var(--warn); font-weight: 600; white-space: nowrap">Средний</td>
+							<td>
+								ИИ-анализ — отдельный необязательный компонент; система полностью работоспособна без
+								него
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<strong>Поддержка установок в чужих контурах</strong>: версии, миграции, диагностика
+							</td>
+							<td style="color: var(--stop); font-weight: 600; white-space: nowrap">Высокий</td>
+							<td>
+								Один комплект развёртывания для обоих режимов; автоматические миграции; страница
+								проверки состояния; документированная процедура обновления и отката
+							</td>
+						</tr>
+						<tr>
+							<td><strong>Объём и стоимость хранения видео</strong></td>
+							<td style="color: var(--warn); font-weight: 600; white-space: nowrap">Средний</td>
+							<td>
+								Ограничения записи (ФТ-8.2), настраиваемый срок хранения, отправка только по Wi-Fi
+							</td>
+						</tr>
+						<tr>
+							<td><strong>Отсутствие интерфейса СППИ</strong></td>
+							<td style="color: var(--ink-3); font-weight: 600; white-space: nowrap">Принято</td>
+							<td>
+								Ручной ввод номеров планов и разрешений; система контролирует сроки, а не подаёт
+								заявки
+							</td>
+						</tr>
+						<tr>
+							<td><strong>Ограничения PWA на iOS</strong></td>
+							<td style="color: var(--warn); font-weight: 600; white-space: nowrap">Средний</td>
+							<td>
+								Обязательная установка на домашний экран, проверка режима запуска, синхронизация при
+								открытии
+							</td>
+						</tr>
+						<tr>
+							<td><strong>Переполнение локального хранилища</strong> документами и видео</td>
+							<td style="color: var(--warn); font-weight: 600; white-space: nowrap">Средний</td>
+							<td>
+								Ограничение объёма, вытеснение материалов завершённых полётов, индикатор занятости
+							</td>
+						</tr>
+						<tr>
+							<td><strong>Расхождение правил предупреждений</strong> между клиентом и сервером</td>
+							<td style="color: var(--stop); font-weight: 600; white-space: nowrap">Высокий</td>
+							<td>Единый модуль правил, покрытый тестами и исполняемый в обеих средах</td>
+						</tr>
+						<tr>
+							<td><strong>Формальное прохождение</strong> чеклиста «на автомате»</td>
+							<td style="color: var(--warn); font-weight: 600; white-space: nowrap">Средний</td>
+							<td>
+								Контроль длительности подготовки, фотофиксация ключевых пунктов, метрика
+								подозрительно быстрых прохождений (ФТ-15.10)
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<section id="s7">
+			<span class="sec-num">Раздел 07</span>
+			<h2>Этапы разработки</h2>
+			<div class="phases">
+				<div class="phase">
+					<div class="phase-h">
+						<span class="phase-n">01</span><span class="phase-t">MVP</span
+						><span class="chip mvp">133 требования</span>
+					</div>
+					<p class="phase-c">
+						Компания с приглашениями по ссылке. Пользователи и документы. Парк БВС. Редактор
+						чеклистов с версионированием. Планирование полёта с привязкой версии чеклиста и
+						документами. Ручное прохождение с автозаполнением и офлайном. Дефекты. Механизм
+						предупреждений и принятия ответственности. Журнал полётов. Офлайн-предъявление
+						документов. Дашборд с календарём, планируемыми полётами и круговыми диаграммами. Отчёт
+						по предупреждениям. Комплект развёртывания для собственного контура.
+					</p>
+					<p class="phase-r">
+						<em>Результат:</em> система полностью заменяет бумажный журнал и таблицы, а компания
+						может развернуть её у себя.
+					</p>
+				</div>
+				<div class="phase">
+					<div class="phase-h">
+						<span class="phase-n">02</span><span class="phase-t">Техническая эксплуатация</span
+						><span class="chip p2">41 требование</span>
+					</div>
+					<p class="phase-c">
+						Аккумуляторы с учётом циклов. Компоненты и наработка агрегатов. Регламентное ТО.
+						Расширенный дашборд. Уведомления. Погодные и временны́е предупреждения. Настройка уровней
+						предупреждений. Экспорт данных компании.
+					</p>
+					<p class="phase-r">
+						<em>Результат:</em> закрывается роль техника, обслуживание переходит с «на глаз» на учёт
+						ресурса.
+					</p>
+				</div>
+				<div class="phase">
+					<div class="phase-h">
+						<span class="phase-n">03</span><span class="phase-t">Регуляторная часть</span
+						><span class="chip p3">9 требований</span>
+					</div>
+					<p class="phase-c">
+						Разрешения на ИВП. Планы полётов СППИ. Контроль сроков и районов. Реестр ограничений.
+						Отчётность, пригодная для предъявления проверяющим.
+					</p>
+					<p class="phase-r">
+						<em>Результат:</em> закрывается регуляторная нагрузка администратора.
+					</p>
+				</div>
+				<div class="phase">
+					<div class="phase-h">
+						<span class="phase-n">04</span><span class="phase-t">Видеофиксация и локальный ИИ</span
+						><span class="chip p4">19 требований</span>
+					</div>
+					<p class="phase-c">
+						Запись видео с голосовым сопровождением. Развёртывание локальных моделей. Конвейер
+						анализа. Автозаполнение с подтверждением пилотом. Метрика качества.
+					</p>
+					<p class="phase-r">
+						<em>Обоснование очерёдности:</em> анализ раскладывается на пункты уже существующего
+						чеклиста, поэтому требует готовой структуры Этапа 1. Кроме того, это ускорение
+						работающего процесса, а не сам процесс.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<section id="s8">
+			<span class="sec-num">Раздел 08</span>
+			<h2>Открытые вопросы</h2>
+			<p class="lede">
+				Первые три требуют решения до начала проектирования базы данных и комплекта развёртывания.
+			</p>
+			<div class="q">
+				<div class="qi">
+					<div>
+						<strong>Что именно разворачивается в контуре заказчика</strong> — только база данных, к
+						которой обращается облачное приложение, или весь комплект целиком? Документ исходит из
+						второго варианта: приложение, БД и хранилище в контуре компании. Первый вариант
+						технически возможен, но означает обращения приложения к БД через интернет — заметная
+						задержка на каждом запросе и постоянно открытый доступ к базе снаружи. Требует
+						подтверждения.
+					</div>
+				</div>
+				<div class="qi">
+					<div>
+						<strong>Модель лицензирования собственного контура</strong> — программное обеспечение
+						бесплатно и оплачивается только облако, или предусмотрена лицензия на установку? От
+						этого зависит экономика проекта.
+					</div>
+				</div>
+				<div class="qi">
+					<div>
+						<strong>Наличие GPU у заказчиков.</strong> Если оборудования нет ни у кого, ИИ-анализ
+						становится облачной функцией, что противоречит требованию о локальных моделях. Нужна
+						оценка по реальным клиентам.
+					</div>
+				</div>
+				<div class="qi">
+					<div>
+						<strong>Типы БВС в парке</strong> — мультироторы, самолётного типа, оба? Определяет
+						состав типовых чеклистов и перечень контролируемых агрегатов.
+					</div>
+				</div>
+				<div class="qi">
+					<div>
+						<strong>Устройства пилотов</strong> — Android, iOS или смешанный парк? Определяет
+						остроту ограничений НФТ-1.10.
+					</div>
+				</div>
+				<div class="qi">
+					<div>
+						<strong>Электронная подпись записей о принятии ответственности</strong> в юридически
+						значимом смысле — требуется, или достаточно фиксации авторства в системе? При отсутствии
+						блокировок эта запись — основной документ системы.
+					</div>
+				</div>
+				<div class="qi">
+					<div>
+						<strong>Кто и как реагирует на предупреждения</strong> со стороны руководства:
+						достаточно ли отчёта и уведомлений, или нужен процесс разбора с фиксацией решения.
+					</div>
+				</div>
+				<div class="qi">
+					<div>
+						<strong>Существующие источники данных</strong> — есть ли журналы в Excel, которые
+						потребуется импортировать при внедрении.
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer class="foot">
+		<span>ЭКИПАЖ · Требования к системе · Версия 0.2</span>
+		<span>31.08.2026 · Черновик, на согласовании</span>
+	</footer>
+</div>
