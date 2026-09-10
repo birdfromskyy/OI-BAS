@@ -23,6 +23,7 @@ credentials/
 *.sqlite
 *.sqlite3
 *.db
+*.xlsx
 
 # Логи, инструменты разработки и ОС.
 *.log
