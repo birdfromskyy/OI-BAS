@@ -1,4 +1,4 @@
-FROM node:25-alpine AS dependencies
+FROM node:26-alpine AS dependencies
 WORKDIR /app
 COPY package.json package-lock.json .npmrc ./
 RUN npm ci --no-audit --no-fund
