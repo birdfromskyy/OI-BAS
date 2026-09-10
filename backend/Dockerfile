@@ -12,8 +12,9 @@ FROM base AS build
 RUN CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /api ./cmd/api
 
 FROM alpine:3.22 AS production
-RUN adduser -D -H -u 10001 app
-USER app
+RUN apk add --no-cache ca-certificates \
+    && adduser -D -H -u 10001 app
 COPY --from=build /api /api
+USER app
 EXPOSE 8080
 ENTRYPOINT ["/api"]

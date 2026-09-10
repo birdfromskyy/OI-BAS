@@ -1,0 +1,74 @@
+name: Развёртывание production
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Опубликованный тег образов (например v1.0.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Развернуть ${{ inputs.image_tag }}
+    runs-on: ubuntu-24.04
+    environment: production
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      REGISTRY_PULL_USERNAME: ${{ secrets.REGISTRY_PULL_USERNAME }}
+      REGISTRY_PULL_TOKEN: ${{ secrets.REGISTRY_PULL_TOKEN }}
+      IMAGE_TAG: ${{ inputs.image_tag }}
+      OWNER: ${{ github.repository_owner }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Проверить обязательные секреты
+        run: |
+          test -n "$DEPLOY_HOST"
+          test -n "$DEPLOY_USER"
+          test -n "$DEPLOY_SSH_PRIVATE_KEY"
+          test -n "$DEPLOY_KNOWN_HOSTS"
+          test -n "$REGISTRY_PULL_USERNAME"
+          test -n "$REGISTRY_PULL_TOKEN"
+      - name: Настроить SSH с закреплённым ключом сервера
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+      - name: Передать только deployment-конфигурацию
+        run: |
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" 'sudo install -d -o deploy -g deploy -m 0750 /opt/oi-bas'
+          scp compose.prod.yaml "$DEPLOY_USER@$DEPLOY_HOST:/opt/oi-bas/compose.prod.yaml"
+      - name: Получить образы и перезапустить контейнеры
+        run: |
+          printf '%s' "$REGISTRY_PULL_TOKEN" | ssh "$DEPLOY_USER@$DEPLOY_HOST" \
+            "docker login ghcr.io --username '$REGISTRY_PULL_USERNAME' --password-stdin"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" \
+            "cd /opt/oi-bas && API_IMAGE=ghcr.io/$OWNER/oi-bas-api:$IMAGE_TAG WEB_IMAGE=ghcr.io/$OWNER/oi-bas-web:$IMAGE_TAG docker compose --env-file .env -f compose.prod.yaml pull"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" \
+            "cd /opt/oi-bas && API_IMAGE=ghcr.io/$OWNER/oi-bas-api:$IMAGE_TAG WEB_IMAGE=ghcr.io/$OWNER/oi-bas-web:$IMAGE_TAG docker compose --env-file .env -f compose.prod.yaml up -d --no-build --remove-orphans"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" '
+            cd /opt/oi-bas
+            for attempt in $(seq 1 12); do
+              api_id=$(docker compose --env-file .env -f compose.prod.yaml ps -q api)
+              web_id=$(docker compose --env-file .env -f compose.prod.yaml ps -q web)
+              api_status=$(docker inspect --format "{{.State.Health.Status}}" "$api_id" 2>/dev/null || true)
+              web_status=$(docker inspect --format "{{.State.Health.Status}}" "$web_id" 2>/dev/null || true)
+              if [ "$api_status" = healthy ] && [ "$web_status" = healthy ]; then exit 0; fi
+              sleep 5
+            done
+            echo "Контейнеры не стали healthy" >&2
+            exit 1
+          '
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" 'docker image prune -f'

@@ -1,7 +1,7 @@
 .git
 .env
 .env.*
-!*.example
-tmp
 bin
+tmp
 coverage
+*.coverprofile

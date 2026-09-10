@@ -52,8 +52,7 @@ services:
       - api
 
 volumes:
-  # Same named local volume as production preserves existing access links and
-  # data when switching from the former single-compose layout.
+  # Development data is intentionally separate from the production volume.
   postgres_data:
   go_module_cache:
   go_build_cache:

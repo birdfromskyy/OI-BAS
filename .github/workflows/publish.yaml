@@ -1,0 +1,51 @@
+name: Публикация образов
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Тег образов (например v1.0.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    env:
+      REGISTRY: ghcr.io
+      OWNER: ${{ github.repository_owner }}
+      IMAGE_TAG: ${{ inputs.image_tag || github.ref_name }}
+      SHA_TAG: sha-${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Проверить тег релиза
+        run: test -n "$IMAGE_TAG"
+      - name: Собрать и опубликовать API
+        run: |
+          image="$REGISTRY/$OWNER/oi-bas-api"
+          docker build --pull --target production \
+            -t "$image:$IMAGE_TAG" -t "$image:$SHA_TAG" ./backend
+          docker push "$image:$IMAGE_TAG"
+          docker push "$image:$SHA_TAG"
+      - name: Собрать и опубликовать PWA
+        run: |
+          image="$REGISTRY/$OWNER/oi-bas-web"
+          docker build --pull --target production \
+            -t "$image:$IMAGE_TAG" -t "$image:$SHA_TAG" ./frontend
+          docker push "$image:$IMAGE_TAG"
+          docker push "$image:$SHA_TAG"
