@@ -30,7 +30,7 @@ jobs:
       IMAGE_TAG: ${{ inputs.image_tag }}
       OWNER: ${{ github.repository_owner }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Проверить обязательные секреты
         run: |
           test -n "$DEPLOY_HOST"
