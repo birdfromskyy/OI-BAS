@@ -1,51 +1,58 @@
 # OI-BAS
 
 PWA для учёта полётов, персонала, парка БВС, чеклистов и аккумуляторов.
-Приложение рассчитано на работу в полях: действия сначала надёжно сохраняются
-на устройстве, а затем синхронизируются с PostgreSQL при появлении сети.
+Приложение сохраняет действия на устройстве и синхронизирует их с PostgreSQL
+после появления сети.
 
 ## Возможности
 
-- персональные бессрочные ссылки вместо регистрации и паролей;
-- роли: владелец, администратор, пилот, наблюдатель;
-- учёт полётов, БВС, площадок, чеклистов, прохождений и аккумуляторов;
-- мягкое удаление связанных сущностей и аудит действий;
+- персональные бессрочные ссылки вместо паролей и регистрации;
+- роли: владелец, администратор, пилот и наблюдатель;
+- учёт полётов, БВС, локаций, чеклистов, прохождений и аккумуляторов;
+- мягкое удаление, аудит и проверка связанных записей;
 - PWA и офлайн-очередь синхронизации;
-- optimistic locking: ревизии защищают запись от случайной перезаписи.
+- optimistic locking: `revision` защищает записи от незаметной перезаписи.
 
-## Структура
+## Архитектура
+
+```text
+Браузер / PWA
+       │ HTTPS :443
+       ▼
+ Caddy (единственный публичный контейнер)
+       │ private Docker network
+       ▼
+ Go + Gin API ───────── PostgreSQL
+       private Docker network
+```
+
+В production наружу публикуются только 80 и 443 порты Caddy. API и PostgreSQL
+не имеют host-портов и недоступны напрямую из интернета.
 
 ```text
 backend/
-  cmd/api/                         # точка запуска и CLI-команда bootstrap
-  internal/config/                 # чтение и проверка окружения
-  internal/database/postgres/      # подключение к PostgreSQL
-  internal/httpapi/                # Gin API, ссылки, роли, sync
-  db/legacy-schema.sql             # исходная схема, не применяется приложением
+  cmd/api/                         # точка запуска и команда bootstrap
+  internal/config/                 # проверка окружения
+  internal/database/postgres/      # пул PostgreSQL
+  internal/httpapi/                # Gin API, роли, ссылки, sync
 frontend/                          # SvelteKit PWA
-docs/                              # требования и техническая документация
-compose.dev.yaml                   # локальная разработка с Vite
-compose.prod.yaml                  # production-сборка с Caddy
-.env.example                       # безопасный шаблон переменных
+compose.dev.yaml                   # Vite + API + PostgreSQL для разработки
+compose.prod.yaml                  # изолированный production-контур
+.env.example                       # безопасный шаблон development
+.env.prod.example                  # безопасный шаблон production
+.github/workflows/                 # CI, публикация и ручное deployment
 ```
 
-## Требования
+## Локальная разработка
 
-- Docker Desktop с Docker Compose v2;
-- GNU Make (на macOS уже доступен);
-- для запуска вне Docker: Go 1.26 и Node.js 25.
-
-## Локальный запуск
-
-Создайте локальную конфигурацию. Файл `.env` игнорируется Git и не должен
-публиковаться.
+Нужны Docker Desktop с Compose v2 и GNU Make.
 
 ```sh
 cp .env.example .env
 make dev
 ```
 
-Откройте `http://localhost:8080`.
+После запуска доступны:
 
 | Сервис | Адрес |
 | --- | --- |
@@ -53,14 +60,14 @@ make dev
 | Go API | `http://localhost:8081` |
 | PostgreSQL | `localhost:5435` |
 
-Первый владелец создаётся только для пустой БД. Команда напечатает единственную
-персональную ссылку — сохраните её в надёжном месте.
+Первый владелец создаётся только в пустой БД. Команда напечатает единственную
+персональную ссылку — сохраните её в менеджере паролей.
 
 ```sh
 make bootstrap NAME="ФИО владельца"
 ```
 
-Остановить локальный контур, не удаляя данные:
+Остановить development-контур, не удаляя данные:
 
 ```sh
 make dev-down
@@ -68,43 +75,113 @@ make dev-down
 
 ## Production
 
-Перед запуском задайте в локальном `.env` уникальный `POSTGRES_PASSWORD` и
-публичный адрес `APP_BASE_URL_PROD`.
+Production-конфигурация подготовлена, но до фактического развёртывания нужно:
+
+1. Направить A-запись `oi-bas.space` на публичный IP сервера.
+2. Открыть на сервере только TCP 22, 80 и 443.
+3. На сервере скопировать шаблон в **неотслеживаемый** файл `.env` и заменить
+   все значения `REPLACE_*`:
+
+   ```sh
+   cp .env.prod.example .env
+   chmod 600 .env
+   ```
+
+4. Указать реальный `TLS_EMAIL`, длинный уникальный `POSTGRES_PASSWORD` и
+   публичный `APP_BASE_URL_PROD=https://oi-bas.space`.
+
+Caddy сам выпустит и продлит TLS-сертификат Let's Encrypt. Его `/data` и
+`/config`, а также production PostgreSQL хранятся в отдельных named volumes:
+`caddy_data`, `caddy_config`, `postgres_prod_data`. Production Compose имеет
+собственное имя проекта `oi-bas-prod`; его volumes и контейнеры не пересекаются
+с development-контуром `oi-bas`.
+
+Проверить итоговую Compose-конфигурацию без запуска:
+
+```sh
+docker compose --env-file .env -f compose.prod.yaml config --quiet
+```
+
+Первый запуск из исходников:
 
 ```sh
 make prod
+make bootstrap-prod NAME="ФИО владельца"
 ```
 
-Production раздаёт PWA и API на одном origin, по умолчанию
-`http://localhost:8080`. PostgreSQL наружу не публикуется.
+На рабочем компьютере, где `.env` уже используется development-контуром,
+можно держать отдельный игнорируемый файл `.env.prod` и запускать так:
 
-`compose.dev.yaml` и `compose.prod.yaml` используют один именованный local
-volume `oi-bas_postgres_data`; это сохраняет существующие данные и access-link
-при переходе между режимами. Запускайте только один режим одновременно.
+```sh
+PROD_ENV_FILE=.env.prod make prod
+```
+
+Обычный production-деплой после публикации CI-образов:
+
+```sh
+make prod-deploy
+make prod-logs
+```
+
+Никогда не используйте `docker compose down -v` на production: команда удалит
+volume PostgreSQL и сертификаты Caddy.
+
+## CI/CD
+
+`Проверки` запускается на каждом push и pull request в `main`:
+
+- Go format, тесты, `go vet` и интеграционный тест с чистым PostgreSQL;
+- Prettier, Svelte typecheck, Vitest и production-сборка PWA;
+- сборка обоих production-образов, проверка Caddy и Compose.
+
+Тег вида `v1.0.0` запускает `Публикация образов` и помещает API/PWA в GHCR:
+`ghcr.io/birdfromskyy/oi-bas-api:v1.0.0` и
+`ghcr.io/birdfromskyy/oi-bas-web:v1.0.0`.
+
+`Развёртывание production` запускается только вручную и использует GitHub
+Environment `production`. До первого деплоя в этом Environment нужно добавить
+следующие secrets:
+
+| Secret | Значение |
+| --- | --- |
+| `DEPLOY_HOST` | публичный IP или `oi-bas.space` |
+| `DEPLOY_USER` | `deploy` |
+| `DEPLOY_SSH_PRIVATE_KEY` | отдельный закрытый ключ GitHub Actions для пользователя `deploy` |
+| `DEPLOY_KNOWN_HOSTS` | закреплённая строка из проверенного `ssh-keyscan -H <IP>` |
+| `REGISTRY_PULL_USERNAME` | пользователь GitHub с доступом к пакетам |
+| `REGISTRY_PULL_TOKEN` | отдельный токен GitHub с минимальным правом `read:packages` |
+
+Не передавайте в GitHub Actions личный ключ `~/.ssh/oi_bas_prod`: для CI/CD
+создаётся отдельная пара ключей с возможностью отдельно отозвать её.
 
 ## Переменные окружения
 
 | Переменная | Назначение |
 | --- | --- |
-| `POSTGRES_DB` | имя базы данных |
-| `POSTGRES_USER` | пользователь PostgreSQL |
-| `POSTGRES_PASSWORD` | пароль PostgreSQL; только в локальном `.env` |
-| `POSTGRES_PORT` | локальный порт PostgreSQL для development |
-| `API_PORT` | локальный порт Go API для development |
-| `WEB_PORT_DEV` | локальный порт PWA в development |
-| `APP_BASE_URL_DEV` | базовый URL ссылок в development |
-| `WEB_PORT_PROD` | внешний HTTP-порт production |
-| `APP_BASE_URL_PROD` | публичный URL production-ссылок |
+| `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | реквизиты PostgreSQL |
+| `POSTGRES_PORT` | development-порт PostgreSQL |
+| `API_PORT`, `WEB_PORT_DEV` | development-порты API и PWA |
+| `APP_BASE_URL_DEV` | базовый URL ссылок development |
+| `APP_DOMAIN` | домен production Caddy |
+| `TLS_EMAIL` | e-mail для Let's Encrypt |
+| `APP_BASE_URL_PROD` | публичный HTTPS URL для новых ссылок |
+| `API_IMAGE`, `WEB_IMAGE` | образы API и PWA для deployment |
+| `DATABASE_MAX_CONNS` | предел пула PostgreSQL API, по умолчанию 10 |
 
 ## Доступ и синхронизация
 
-В БД хранится только SHA-256 хеш access-link, никогда не исходный токен.
-Перевыпуск ссылки заменяет старую, отзыв делает её недействительной.
+В БД хранится только SHA-256-хеш персональной ссылки, а не исходный токен.
+Новые ссылки передают токен в URL fragment (`/#access=…`): fragment не попадает
+в HTTP-запросы, логи Caddy и Referer. Ранее выданные query-ссылки остаются
+совместимыми и очищаются из адресной строки сразу после открытия.
 
-Каждая синхронизируемая запись содержит `revision`: создание имеет ревизию `0`,
-сервер сохраняет её как `1`, следующее изменение отправляется с `1` и получает
-`2`. Очередь сохраняется в localStorage до начала сетевого запроса. При
-настоящем конфликте серверную версию не перезаписывают автоматически.
+Создание начинается с revision `0`, сервер сохраняет запись как `1`; следующее
+изменение отправляется с `1` и получает `2`. При настоящем конфликте серверная
+запись не перезаписывается автоматически.
+
+Production-контур также включает лимит на перебор невалидных access-link,
+лимит размера JSON-запроса (2 MiB), request ID, HTTP timeouts, read-only API
+filesystem, drop Linux capabilities и security headers Caddy.
 
 ## Проверки
 
@@ -112,16 +189,26 @@ volume `oi-bas_postgres_data`; это сохраняет существующи�
 make test
 ```
 
-Команда запускает Go-тесты и `go vet`, а также Prettier, Svelte typecheck,
-Vitest и production-сборку frontend.
+Команда запускает Go-тесты и `go vet`, а затем Prettier, Svelte typecheck,
+Vitest и production-сборку PWA.
 
-Для интеграционного API-теста требуется запущенная локальная БД:
+Для локального интеграционного API-теста сначала поднимите development БД:
 
 ```sh
 set -a && source .env && set +a
-TEST_DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable" \
-  go test -count=1 ./backend/internal/httpapi -run TestAPIIntegration -v
+(
+  cd backend
+  TEST_DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable" \
+    go test -count=1 ./internal/httpapi -run TestAPIIntegration -v
+)
 ```
+
+## Резервное копирование
+
+Object Storage сознательно пока не подключён. Перед первым боевым запуском
+обязательны как минимум регулярный `pg_dump` вне VDS и проверка восстановления
+на отдельной БД. Без проверяемой резервной копии production нельзя считать
+готовым.
 
 ## Коммиты
 
