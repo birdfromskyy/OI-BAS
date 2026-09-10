@@ -14,6 +14,10 @@ http:// {
 	}
 }
 
+www.{$APP_DOMAIN} {
+	redir https://{$APP_DOMAIN}{uri} permanent
+}
+
 {$APP_DOMAIN} {
 	root * /usr/share/caddy
 	encode zstd gzip
