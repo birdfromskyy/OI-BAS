@@ -148,11 +148,11 @@ Environment `production`. До первого деплоя в этом Environme
 | `DEPLOY_USER` | `deploy` |
 | `DEPLOY_SSH_PRIVATE_KEY` | отдельный закрытый ключ GitHub Actions для пользователя `deploy` |
 | `DEPLOY_KNOWN_HOSTS` | закреплённая строка из проверенного `ssh-keyscan -H <IP>` |
-| `REGISTRY_PULL_USERNAME` | пользователь GitHub с доступом к пакетам |
-| `REGISTRY_PULL_TOKEN` | отдельный токен GitHub с минимальным правом `read:packages` |
 
 Не передавайте в GitHub Actions личный ключ `~/.ssh/oi_bas_prod`: для CI/CD
 создаётся отдельная пара ключей с возможностью отдельно отозвать её.
+Образы GHCR публикуются как public packages, поэтому сервер получает их без
+постоянного GitHub-токена с правом `read:packages`.
 
 ## Переменные окружения
 

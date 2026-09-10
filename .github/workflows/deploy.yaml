@@ -25,8 +25,6 @@ jobs:
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
       DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
       DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
-      REGISTRY_PULL_USERNAME: ${{ secrets.REGISTRY_PULL_USERNAME }}
-      REGISTRY_PULL_TOKEN: ${{ secrets.REGISTRY_PULL_TOKEN }}
       IMAGE_TAG: ${{ inputs.image_tag }}
       OWNER: ${{ github.repository_owner }}
     steps:
@@ -37,8 +35,6 @@ jobs:
           test -n "$DEPLOY_USER"
           test -n "$DEPLOY_SSH_PRIVATE_KEY"
           test -n "$DEPLOY_KNOWN_HOSTS"
-          test -n "$REGISTRY_PULL_USERNAME"
-          test -n "$REGISTRY_PULL_TOKEN"
       - name: Настроить SSH с закреплённым ключом сервера
         run: |
           install -d -m 700 ~/.ssh
@@ -52,8 +48,6 @@ jobs:
           scp compose.prod.yaml "$DEPLOY_USER@$DEPLOY_HOST:/opt/oi-bas/compose.prod.yaml"
       - name: Получить образы и перезапустить контейнеры
         run: |
-          printf '%s' "$REGISTRY_PULL_TOKEN" | ssh "$DEPLOY_USER@$DEPLOY_HOST" \
-            "docker login ghcr.io --username '$REGISTRY_PULL_USERNAME' --password-stdin"
           ssh "$DEPLOY_USER@$DEPLOY_HOST" \
             "cd /opt/oi-bas && API_IMAGE=ghcr.io/$OWNER/oi-bas-api:$IMAGE_TAG WEB_IMAGE=ghcr.io/$OWNER/oi-bas-web:$IMAGE_TAG docker compose --env-file .env -f compose.prod.yaml pull"
           ssh "$DEPLOY_USER@$DEPLOY_HOST" \
