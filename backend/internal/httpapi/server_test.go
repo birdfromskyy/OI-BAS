@@ -203,6 +203,7 @@ func TestAPIIntegration(t *testing.T) {
 		invitedFlight[key] = value
 	}
 	invitedFlight["id"] = newID()
+	delete(invitedFlight, "revision")
 	invitedFlight["pilotId"] = invitedBody.User.ID
 	invitedFlight["pilot"] = invitedBody.User.Name
 	invitedFlight["date"] = tomorrow
