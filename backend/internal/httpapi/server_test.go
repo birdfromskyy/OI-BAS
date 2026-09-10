@@ -171,23 +171,80 @@ func TestAPIIntegration(t *testing.T) {
 		t.Fatalf("pilot checklist: %d %s", pilotChecklist.Code, pilotChecklist.Body.String())
 	}
 	checklistRevision := syncRevision(t, pilotChecklist)
+	today := businessToday().Format("2006-01-02")
+	tomorrow := businessToday().AddDate(0, 0, 1).Format("2006-01-02")
 	flightID := newID()
-	flightData := map[string]any{"id": flightID, "date": "2026-09-09", "pilotId": createdBody.User.ID, "pilot": "Pilot", "aircraftId": aircraftID, "aircraft": "Pilot aircraft", "checklistId": checklistID, "checklist": "Pilot checklist", "runId": "", "site": "", "siteId": "", "status": "запланирован", "task": "Test", "takeoff": "", "landing": "", "duration": 0, "alt": 0, "notes": []any{}}
+	flightData := map[string]any{"id": flightID, "date": today, "pilotId": createdBody.User.ID, "pilot": "Pilot", "aircraftId": aircraftID, "aircraft": "Pilot aircraft", "checklistId": checklistID, "checklist": "Pilot checklist", "runId": "", "site": "", "siteId": "", "status": "запланирован", "task": "Test", "takeoff": "", "landing": "", "duration": 0, "alt": 0, "notes": []any{}}
+	pastFlight := make(map[string]any, len(flightData))
+	for key, value := range flightData {
+		pastFlight[key] = value
+	}
+	pastFlight["id"] = newID()
+	pastFlight["date"] = businessToday().AddDate(0, 0, -1).Format("2006-01-02")
+	if rejected := syncOne(t, router, adminToken, "flight", pastFlight); rejected.Code != http.StatusConflict {
+		t.Fatalf("past scheduled flight was accepted: %d %s", rejected.Code, rejected.Body.String())
+	}
 	adminFlight := syncOne(t, router, adminToken, "flight", flightData)
 	if adminFlight.Code != http.StatusOK {
 		t.Fatalf("admin flight: %d %s", adminFlight.Code, adminFlight.Body.String())
 	}
 	flightData["revision"] = syncRevision(t, adminFlight)
+	// An invited pilot may be selected even before they open their personal link.
+	invited := request(t, router, http.MethodPost, "/api/v1/users", adminToken, map[string]any{"name": "Invited pilot", "roles": []string{"пилот"}, "status": "приглашён"})
+	if invited.Code != http.StatusCreated {
+		t.Fatalf("create invited pilot: %d %s", invited.Code, invited.Body.String())
+	}
+	var invitedBody struct {
+		User user `json:"user"`
+	}
+	decodeBody(t, invited, &invitedBody)
+	invitedFlight := make(map[string]any, len(flightData))
+	for key, value := range flightData {
+		invitedFlight[key] = value
+	}
+	invitedFlight["id"] = newID()
+	invitedFlight["pilotId"] = invitedBody.User.ID
+	invitedFlight["pilot"] = invitedBody.User.Name
+	invitedFlight["date"] = tomorrow
+	if scheduled := syncOne(t, router, adminToken, "flight", invitedFlight); scheduled.Code != http.StatusOK {
+		t.Fatalf("scheduled flight for invited pilot: %d %s", scheduled.Code, scheduled.Body.String())
+	}
+
+	// Another active pilot may perform preparation, but may not record takeoff
+	// for the person assigned to the flight.
+	helper := request(t, router, http.MethodPost, "/api/v1/users", adminToken, map[string]any{"name": "Preparation pilot", "roles": []string{"пилот"}, "status": "приглашён"})
+	if helper.Code != http.StatusCreated {
+		t.Fatalf("create preparation pilot: %d %s", helper.Code, helper.Body.String())
+	}
+	var helperBody struct {
+		User      user   `json:"user"`
+		AccessURL string `json:"accessUrl"`
+	}
+	decodeBody(t, helper, &helperBody)
+	helperToken := accessFromURL(t, helperBody.AccessURL)
+	if activation := request(t, router, http.MethodGet, "/api/v1/bootstrap", helperToken, nil); activation.Code != http.StatusOK {
+		t.Fatalf("activate preparation pilot: %d %s", activation.Code, activation.Body.String())
+	}
 	flightData["status"] = "подготовка пройдена"
-	pilotFlight := syncOne(t, router, pilotToken, "flight", flightData)
+	pilotFlight := syncOne(t, router, helperToken, "flight", flightData)
 	if pilotFlight.Code != http.StatusOK {
-		t.Fatalf("pilot own flight: %d %s", pilotFlight.Code, pilotFlight.Body.String())
+		t.Fatalf("another pilot prepares flight: %d %s", pilotFlight.Code, pilotFlight.Body.String())
 	}
 	preparedFlightRevision := syncRevision(t, pilotFlight)
-	run := syncOne(t, router, pilotToken, "run", map[string]any{"id": newID(), "flightId": flightID, "checklistId": checklistID, "date": "2026-09-09", "signature": "Pilot"})
+	run := syncOne(t, router, helperToken, "run", map[string]any{"id": newID(), "flightId": flightID, "checklistId": checklistID, "date": today, "signature": "Preparation pilot"})
 	if run.Code != http.StatusOK {
-		t.Fatalf("pilot run: %d %s", run.Code, run.Body.String())
+		t.Fatalf("another pilot run: %d %s", run.Code, run.Body.String())
 	}
+	flightData["revision"] = preparedFlightRevision
+	flightData["status"] = "выполняется"
+	if rejected := syncOne(t, router, helperToken, "flight", flightData); rejected.Code != http.StatusConflict {
+		t.Fatalf("unassigned pilot recorded takeoff: %d %s", rejected.Code, rejected.Body.String())
+	}
+	started := syncOne(t, router, pilotToken, "flight", flightData)
+	if started.Code != http.StatusOK {
+		t.Fatalf("assigned pilot recorded takeoff: %d %s", started.Code, started.Body.String())
+	}
+	runningFlightRevision := syncRevision(t, started)
 	site := syncOne(t, router, pilotToken, "site", map[string]any{"id": newID(), "name": "Test site", "lat": 57.1, "lon": 65.5})
 	if site.Code != http.StatusOK {
 		t.Fatalf("pilot site: %d %s", site.Code, site.Body.String())
@@ -197,7 +254,7 @@ func TestAPIIntegration(t *testing.T) {
 	// a preparation/completed record. This is deliberately checked server-side,
 	// independently from which buttons the browser happened to show.
 	otherFlightID := newID()
-	otherFlight := map[string]any{"id": otherFlightID, "date": "2026-09-10", "pilotId": adminID, "pilot": "Owner Updated", "aircraftId": aircraftID, "aircraft": "Pilot aircraft", "checklistId": checklistID, "checklist": "Pilot checklist", "runId": "", "site": "", "siteId": "", "status": "запланирован", "task": "Other pilot plan", "takeoff": "", "landing": "", "duration": 0, "alt": 0, "notes": []any{}}
+	otherFlight := map[string]any{"id": otherFlightID, "date": tomorrow, "pilotId": adminID, "pilot": "Owner Updated", "aircraftId": aircraftID, "aircraft": "Pilot aircraft", "checklistId": checklistID, "checklist": "Pilot checklist", "runId": "", "site": "", "siteId": "", "status": "запланирован", "task": "Other pilot plan", "takeoff": "", "landing": "", "duration": 0, "alt": 0, "notes": []any{}}
 	otherCreated := syncOne(t, router, adminToken, "flight", otherFlight)
 	if otherCreated.Code != http.StatusOK {
 		t.Fatalf("create another scheduled flight: %d %s", otherCreated.Code, otherCreated.Body.String())
@@ -247,7 +304,7 @@ func TestAPIIntegration(t *testing.T) {
 
 	// Closing a flight makes it immutable to a pilot, even if that pilot was
 	// assigned to it. Administrators retain full journal management rights.
-	flightData["revision"] = preparedFlightRevision
+	flightData["revision"] = runningFlightRevision
 	flightData["status"] = "завершён"
 	completed := syncOne(t, router, adminToken, "flight", flightData)
 	if completed.Code != http.StatusOK {

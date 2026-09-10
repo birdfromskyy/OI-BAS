@@ -182,6 +182,7 @@
 		<input
 			type={INPUT[f.edit]}
 			step={f.edit === 'time' ? 1 : undefined}
+			min={f.min}
 			bind:value={draft[f.key]}
 			class={FIELD_CLASS}
 		/>

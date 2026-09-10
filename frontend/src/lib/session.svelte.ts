@@ -33,7 +33,9 @@ function cacheProfile(profile: Profile) {
 }
 
 export const me = $state<Profile>({ ...cachedProfile() });
-if (me.id) setSyncActor(me.id);
+// Сначала layout сверит кэш с bootstrap и склеит его с outbox. Иначе ранний
+// flush может обогнать bootstrap и тот затрёт только что подтверждённую запись.
+if (me.id) setSyncActor(me.id, false);
 export const session = $state({ ready: false, error: '' });
 
 export function signedIn(): boolean {
@@ -58,10 +60,10 @@ export function isMe(role: Role): boolean {
 export function signature(): string {
 	return `${me.name}, ${new Date().toLocaleString('ru-RU')}`;
 }
-export function applyProfile(profile: Profile) {
+export function applyProfile(profile: Profile, syncImmediately = true) {
 	Object.assign(me, profile);
 	cacheProfile(me);
-	setSyncActor(me.id);
+	setSyncActor(me.id, syncImmediately);
 }
 export async function updateProfile(input: { name: string; phone: string }) {
 	await api('/me', { method: 'PUT', body: JSON.stringify(input) });

@@ -542,10 +542,19 @@ func (s *server) activeUser(ctx context.Context, tx pgx.Tx, id string) error {
 	if err := tx.QueryRow(ctx, "SELECT status FROM users WHERE id=$1", id).Scan(&status); err != nil {
 		return errors.New("pilot not found")
 	}
-	if status != "активен" {
-		return errors.New("pilot is not active")
+	// План можно оформить на приглашённого пилота: ссылка ещё не была открыта,
+	// но он уже сотрудник команды. Деактивированному назначение запрещено.
+	if status != "активен" && status != "приглашён" {
+		return errors.New("pilot is not active or invited")
 	}
 	return nil
+}
+
+var businessTimezone = time.FixedZone("Asia/Yekaterinburg", 5*60*60)
+
+func businessToday() time.Time {
+	now := time.Now().In(businessTimezone)
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, businessTimezone)
 }
 
 // upsertDocument applies optimistic locking. A new client-generated UUID has
@@ -661,8 +670,17 @@ func (s *server) validateFlight(ctx context.Context, tx pgx.Tx, doc map[string]a
 	if !isOneOf(status, "черновик", "запланирован", "подготовка пройдена", "выполняется", "завершён", "отменён") {
 		return errors.New("unknown flight status")
 	}
-	if err := timeValue(textValue(doc["date"]), "2006-01-02"); err != nil {
+	dateText := textValue(doc["date"])
+	if err := timeValue(dateText, "2006-01-02"); err != nil {
 		return err
+	}
+	// Планирование — действие о будущем. Исторические завершённые записи можно
+	// вести в журнале, но «запланирован» задним числом создавать нельзя.
+	if status == "запланирован" {
+		date, _ := time.ParseInLocation("2006-01-02", dateText, businessTimezone)
+		if date.Before(businessToday()) {
+			return errors.New("scheduled flight date cannot be in the past")
+		}
 	}
 	if err := timeValue(textValue(doc["takeoff"]), "15:04:05"); err != nil && timeValue(textValue(doc["takeoff"]), "15:04") != nil {
 		return err
@@ -727,8 +745,8 @@ func (s *server) validateFlight(ctx context.Context, tx pgx.Tx, doc map[string]a
 }
 
 func (s *server) authorizeFlight(ctx context.Context, tx pgx.Tx, actor user, id string, doc map[string]any, deleting bool) error {
-	var currentStatus string
-	err := tx.QueryRow(ctx, "SELECT status FROM flights WHERE id=$1 AND deleted_at IS NULL", id).Scan(&currentStatus)
+	var currentStatus, assignedPilotID string
+	err := tx.QueryRow(ctx, "SELECT status,COALESCE(pilot_id::text,'') FROM flights WHERE id=$1 AND deleted_at IS NULL", id).Scan(&currentStatus, &assignedPilotID)
 	isNew := errors.Is(err, pgx.ErrNoRows)
 	if err != nil && !isNew {
 		return err
@@ -757,10 +775,18 @@ func (s *server) authorizeFlight(ctx context.Context, tx pgx.Tx, actor user, id 
 	}
 	// These are state transitions performed by dedicated flight/checklist
 	// actions, not a free edit of a completed record.
-	if (currentStatus == "запланирован" && nextStatus == "подготовка пройдена") ||
-		(currentStatus == "подготовка пройдена" && nextStatus == "выполняется") ||
-		(currentStatus == "выполняется" && nextStatus == "завершён") {
+	// Подготовить борт может любой пилот команды. Но взлёт и посадку фиксирует
+	// исключительно назначенный пилот: нельзя сменить pilotId в том же запросе
+	// и забрать чужой полёт.
+	if currentStatus == "запланирован" && nextStatus == "подготовка пройдена" {
 		return nil
+	}
+	if (currentStatus == "подготовка пройдена" && nextStatus == "выполняется") ||
+		(currentStatus == "выполняется" && nextStatus == "завершён") {
+		if assignedPilotID == actor.ID && textValue(doc["pilotId"]) == assignedPilotID {
+			return nil
+		}
+		return errors.New("only the assigned pilot may record takeoff or landing")
 	}
 	return errors.New("pilots may edit only scheduled flights")
 }
@@ -770,14 +796,16 @@ func (s *server) validateRun(ctx context.Context, tx pgx.Tx, actor user, id stri
 	if err != nil {
 		return err
 	}
-	var pilotID string
-	if err = tx.QueryRow(ctx, "SELECT pilot_id FROM flights WHERE id=$1 AND deleted_at IS NULL", flightID).Scan(&pilotID); err != nil {
+	if err = tx.QueryRow(ctx, "SELECT pilot_id FROM flights WHERE id=$1 AND deleted_at IS NULL", flightID).Scan(new(string)); err != nil {
 		return errors.New("flight not found or deleted")
 	}
-	if !hasRole(actor, "администратор") && (!hasRole(actor, "пилот") || pilotID != actor.ID) {
-		return errors.New("pilots may change only their own checklist runs")
+	if !hasRole(actor, "администратор") && !hasRole(actor, "пилот") {
+		return errors.New("pilot or administrator role is required")
 	}
-	doc["pilotId"] = pilotID
+	// Подготовку вправе провести любой пилот, а в протоколе остаётся тот, кто
+	// действительно её выполнял, а не назначенный на будущий взлёт коллега.
+	doc["pilotId"] = actor.ID
+	doc["pilot"] = actor.Name
 	checklistID, err := docID(doc, "checklistId", true)
 	if err != nil {
 		return err

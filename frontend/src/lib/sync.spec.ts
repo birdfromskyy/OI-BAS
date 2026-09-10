@@ -118,4 +118,21 @@ describe('offline synchronization', () => {
 		expect(saved).toHaveLength(1);
 		expect(saved[0]).toMatchObject({ ref: 'flight-1', actorId: 'pilot-1' });
 	});
+
+	it('keeps a blocked local mutation visible to bootstrap reconciliation', async () => {
+		const local = memoryStorage();
+		const session = memoryStorage();
+		vi.stubGlobal('localStorage', local);
+		vi.stubGlobal('sessionStorage', session);
+		local.setItem('ekipazh.access-token', 'test-access-token');
+		session.setItem('ekipazh.session-access-token', 'test-access-token');
+
+		const { enqueue, hasQueued, net, outbox, setSyncActor } = await import('./sync.svelte');
+		setSyncActor('pilot-1', false);
+		net.online = false;
+		enqueue('полёт', 'flight-local', { id: 'flight-local', revision: 0, task: 'Офлайн' });
+		outbox[0].blocked = 'record changed on another device';
+
+		expect(hasQueued('flight', 'flight-local')).toBe(true);
+	});
 });

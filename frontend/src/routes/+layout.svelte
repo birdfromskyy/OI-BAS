@@ -30,7 +30,7 @@
 	import { sites } from '$lib/sites.svelte';
 	import { batteries } from '$lib/batteries.svelte';
 	import { forgetAll } from '$lib/storage.svelte';
-	import { hasWaiting } from '$lib/sync.svelte';
+	import { flush, hasQueued, hasWaiting } from '$lib/sync.svelte';
 
 	let { children } = $props();
 
@@ -84,6 +84,22 @@
 	function replace<T>(target: T[], values: T[] = []) {
 		target.splice(0, target.length, ...values);
 	}
+	/**
+	 * Bootstrap — это снимок на момент запроса, а не команда выбросить
+	 * офлайн-изменения. Записи с очередью (включая конфликтные) оставляем
+	 * локальными, а серверные значения берём лишь там, где локальной правки нет.
+	 */
+	function reconcile<T extends { id: string }>(target: T[], remote: T[] = [], entity: string) {
+		const local = new Map(target.map((item) => [item.id, item]));
+		const remoteIDs = new Set(remote.map((item) => item.id));
+		const merged = remote.map((item) =>
+			hasQueued(entity, item.id) ? (local.get(item.id) ?? item) : item
+		);
+		for (const item of target) {
+			if (!remoteIDs.has(item.id) && hasQueued(entity, item.id)) merged.push(item);
+		}
+		replace(target, merged);
+	}
 	function applySyncRevision(event: Event) {
 		const detail = (
 			event as CustomEvent<{
@@ -133,15 +149,17 @@
 		}
 		try {
 			const data = await (await api('/bootstrap')).json();
-			applyProfile(data.profile);
+			// Не запускаем flush между получением снимка и его склейкой с localStorage.
+			applyProfile(data.profile, false);
 			replace(staff, data.users);
-			replace(fleet, data.aircraft);
-			replace(checklists, data.checklists);
-			replace(flights, data.flights);
-			replace(runs, data.runs);
-			replace(sites, data.sites);
-			replace(batteries, data.batteries);
+			reconcile(fleet, data.aircraft, 'aircraft');
+			reconcile(checklists, data.checklists, 'checklist');
+			reconcile(flights, data.flights, 'flight');
+			reconcile(runs, data.runs, 'run');
+			reconcile(sites, data.sites, 'site');
+			reconcile(batteries, data.batteries, 'battery');
 			session.error = '';
+			void flush();
 		} catch (error) {
 			session.error = error instanceof Error ? error.message : 'Не удалось подключиться к серверу';
 			// Без сети PWA продолжает работать с профилем и данными того же

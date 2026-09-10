@@ -65,7 +65,14 @@ export const FLIGHT_FIELDS: Column[] = [
 		level: withNotes,
 		edit: 'select'
 	},
-	{ key: 'date', title: 'Дата', format: 'date', edit: 'date' },
+	{
+		key: 'date',
+		title: 'Дата',
+		format: 'date',
+		edit: 'date',
+		// План не создают задним числом; сервер повторяет это правило.
+		min: new Date().toISOString().slice(0, 10)
+	},
 	{ key: 'aircraft', title: 'БВС' },
 	{ key: 'aircraftId', title: 'Идентификатор борта' },
 	{ key: 'pilot', title: 'Пилот' },

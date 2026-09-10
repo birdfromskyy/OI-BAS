@@ -71,7 +71,7 @@ let actorId = browser ? (sessionStorage.getItem(ACTOR_KEY) ?? '') : '';
 let syncAuthorized = false;
 
 /** Вызывается после подтверждённого bootstrap и не даёт разным людям смешать очереди на одном устройстве. */
-export function setSyncActor(id: string) {
+export function setSyncActor(id: string, syncImmediately = true) {
 	actorId = id;
 	syncAuthorized = id !== '';
 	if (browser) {
@@ -79,7 +79,7 @@ export function setSyncActor(id: string) {
 		else sessionStorage.removeItem(ACTOR_KEY);
 	}
 	net.blocked = outbox.filter((p) => p.actorId === actorId && p.blocked !== '').length;
-	if (browser && id && net.online) void flush();
+	if (syncImmediately && browser && id && net.online) void flush();
 }
 
 /** Сколько записей ждёт отправки */
@@ -101,6 +101,17 @@ export function hasWaiting(entity: string, ref: string, exceptOperation = ''): b
 			p.id !== exceptOperation &&
 			p.ref === ref &&
 			ENTITY[p.kind] === entity
+	);
+}
+
+/**
+ * Есть ли на устройстве ещё не подтверждённая сервером версия записи.
+ * В отличие от hasWaiting учитывает и заблокированный конфликт: серверный
+ * bootstrap не имеет права молча убрать такую локальную запись с экрана.
+ */
+export function hasQueued(entity: string, ref: string): boolean {
+	return outbox.some(
+		(p) => !p.sent && p.actorId === actorId && p.ref === ref && ENTITY[p.kind] === entity
 	);
 }
 

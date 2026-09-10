@@ -6,6 +6,7 @@ import type { FlightRow } from '$lib/mocs/rows';
 import type { Spot } from '$lib/meteo';
 import { lapse } from '$lib/components/format';
 import { uuid } from '$lib/api';
+import { me } from '$lib/session.svelte';
 
 /**
  * Прохождения чеклистов на время работы приложения.
@@ -55,7 +56,9 @@ export function startRun(
 	const run: Run = {
 		id: uuid(),
 		flightId: flight.id,
-		pilotId: flight.pilotId,
+		// Проверку может провести любой пилот команды; ответственным за взлёт
+		// остаётся пилот, указанный в самом полёте.
+		pilotId: me.id,
 		checklistId: list.id,
 		checklist: list.title,
 		version: list.version,
@@ -67,7 +70,7 @@ export function startRun(
 		lat: spot?.lat ?? flight.lat,
 		lon: spot?.lon ?? flight.lon,
 		weather,
-		pilot: flight.pilot,
+		pilot: me.name,
 		answers: list.items.map((i) => ({ itemId: i.id, title: i.title, value: null, note: '' })),
 		description: '',
 		signature: '',
@@ -77,7 +80,13 @@ export function startRun(
 	// список реактивный, и после push в нём лежит своя копия — правки в ней
 	// до исходного объекта не доходят, и вызывающий работал бы с отражением
 	runs.push(run);
-	return runs[runs.length - 1];
+	const stored = runs[runs.length - 1];
+	// Первое же действие в чеклисте должно пережить закрытие PWA и bootstrap.
+	// Не ждём подписи: незавершённая подготовка тоже является рабочими данными.
+	enqueue('прохождение', stored.id, stored);
+	flight.runId = stored.id;
+	enqueue('полёт', flight.id, flight);
+	return stored;
 }
 
 /** Записать ответ по пункту. Пишется сразу, чтобы прогресс не терялся (ФТ-6.7) */
@@ -86,6 +95,7 @@ export function answerItem(run: Run, itemId: string, value: Answer['value'], not
 	if (!a) return;
 	a.value = value;
 	a.note = note;
+	enqueue('прохождение', run.id, run);
 }
 
 /** Подпись закрывает прохождение: дальше оно неизменяемо (ФТ-6.9) */
@@ -100,6 +110,7 @@ export function signRun(run: Run, signature: string, description: string) {
 /** Переделка проверки: прежнее прохождение сохраняется с причиной (ФТ-6.9) */
 export function voidRun(run: Run, reason: string) {
 	run.voided = reason;
+	enqueue('прохождение', run.id, run);
 }
 
 /** Сводка по прохождению: заполнено, пропущено, отрицательных, примечаний */
