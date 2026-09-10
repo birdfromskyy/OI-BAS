@@ -1,0 +1,18 @@
+[Unit]
+Description=OI-BAS PostgreSQL backup
+Documentation=https://github.com/birdfromskyy/OI-BAS
+Requires=docker.service
+After=docker.service
+ConditionPathExists=/opt/oi-bas/.env
+ConditionPathExists=/opt/oi-bas/compose.prod.yaml
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/oi-bas-backup
+Nice=10
+IOSchedulingClass=best-effort
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/backups/oi-bas

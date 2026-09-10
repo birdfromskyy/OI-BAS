@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly APP_DIR=/opt/oi-bas
+readonly ENV_FILE="$APP_DIR/.env"
+readonly COMPOSE_FILE="$APP_DIR/compose.prod.yaml"
+readonly BACKUP_DIR=/var/backups/oi-bas
+readonly RETENTION_DAYS=14
+
+if [[ ! -r "$ENV_FILE" || ! -r "$COMPOSE_FILE" ]]; then
+	echo "Файлы production-конфигурации не найдены" >&2
+	exit 1
+fi
+
+set -a
+# shellcheck source=/opt/oi-bas/.env
+source "$ENV_FILE"
+set +a
+
+install -d -m 0700 "$BACKUP_DIR"
+
+timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
+backup_file="$BACKUP_DIR/ekipazh_${timestamp}.dump"
+temporary_file="$BACKUP_DIR/.ekipazh_${timestamp}.tmp"
+
+cleanup() {
+	rm -f "$temporary_file"
+}
+trap cleanup EXIT
+
+cd "$APP_DIR"
+docker compose --env-file .env -f compose.prod.yaml exec -T db \
+	pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+	--format=custom --no-owner --no-privileges > "$temporary_file"
+
+test -s "$temporary_file"
+mv "$temporary_file" "$backup_file"
+sha256sum "$backup_file" > "${backup_file}.sha256"
+
+find "$BACKUP_DIR" -maxdepth 1 -type f -name 'ekipazh_*.dump' -mtime "+$RETENTION_DAYS" -delete
+find "$BACKUP_DIR" -maxdepth 1 -type f -name 'ekipazh_*.dump.sha256' -mtime "+$RETENTION_DAYS" -delete
+
+echo "Резервная копия создана: $backup_file"

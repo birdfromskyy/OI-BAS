@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily OI-BAS PostgreSQL backup
+
+[Timer]
+OnCalendar=*-*-* 03:17:00
+Persistent=true
+RandomizedDelaySec=15m
+Unit=oi-bas-backup.service
+
+[Install]
+WantedBy=timers.target
