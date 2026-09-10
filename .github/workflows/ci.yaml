@@ -34,7 +34,7 @@ jobs:
     env:
       TEST_DATABASE_URL: postgres://oi_bas_test:test-password-not-a-secret@localhost:5432/oi_bas_test?sslmode=disable
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version-file: backend/go.mod
@@ -52,7 +52,7 @@ jobs:
     name: Svelte PWA
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         with:
           node-version: 25
@@ -74,7 +74,7 @@ jobs:
     needs: [backend, frontend]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Собрать API
         run: docker build --target production -t oi-bas-api:ci ./backend
       - name: Собрать PWA и Caddy
