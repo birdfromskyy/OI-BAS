@@ -11,7 +11,7 @@
 	import Tag from '$lib/components/Tag.svelte';
 	import type { Row } from '$lib/components/format';
 	import { PROFILE_FIELDS } from '$lib/components/columns';
-	import { APIError, api, accessToken, rememberAccessToken } from '$lib/api';
+	import { APIError, api, accessToken, accessTokenFromURL, rememberAccessToken } from '$lib/api';
 	import {
 		active as accountActive,
 		applyProfile,
@@ -75,15 +75,10 @@
 	let link = $state('');
 
 	function enter() {
-		try {
-			const url = new URL(link.trim());
-			const token = url.searchParams.get('access');
-			if (!token) return;
-			rememberAccessToken(token);
-			location.assign('/');
-		} catch {
-			/* the button stays disabled until a valid URL is pasted */
-		}
+		const token = accessTokenFromURL(link.trim());
+		if (!token) return;
+		rememberAccessToken(token);
+		location.assign('/');
 	}
 
 	function replace<T>(target: T[], values: T[] = []) {
@@ -300,14 +295,14 @@
 				<input
 					bind:value={link}
 					class="min-h-touch rounded-lg border px-3"
-					placeholder="http://…/?access=…"
+					placeholder="https://…/#access=…"
 					onkeydown={(e) => e.key === 'Enter' && enter()}
 				/>
 			</label>
 
 			<button
 				class="click min-h-touch rounded-lg border border-accent bg-accent/15 p-3 text-accent disabled:opacity-40"
-				disabled={!link.includes('access=')}
+				disabled={!accessTokenFromURL(link)}
 				onclick={enter}
 			>
 				Войти

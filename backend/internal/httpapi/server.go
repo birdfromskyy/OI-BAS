@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -26,8 +27,10 @@ type config struct{ baseURL string }
 // Server is the application HTTP server. It does not own the database pool;
 // the composition root closes the pool during graceful shutdown.
 type Server struct {
-	db  *pgxpool.Pool
-	cfg config
+	db          *pgxpool.Pool
+	cfg         config
+	limiterOnce sync.Once
+	limiter     *rateLimiter
 }
 
 // server is kept as an internal alias while the handlers use concise
@@ -224,10 +227,11 @@ func (s *server) router() *gin.Engine {
 	// headers for authorization, so trusting every upstream proxy is needless
 	// and would make the usual Gin warning a real production footgun.
 	_ = r.SetTrustedProxies(nil)
-	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(s.requestID(), gin.Logger(), gin.Recovery())
 	r.GET("/healthz", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"ok": true}) })
+	r.GET("/readyz", s.ready)
 	api := r.Group("/api/v1")
-	api.Use(s.requireUser)
+	api.Use(s.limitRequestBody(), s.requireUser, s.limitByUser())
 	api.GET("/bootstrap", s.getBootstrap)
 	api.POST("/sync", s.sync)
 	api.PUT("/me", s.updateMe)
@@ -237,6 +241,16 @@ func (s *server) router() *gin.Engine {
 	api.DELETE("/users/:id/access-link", s.revokeLink)
 	api.POST("/users/:id/transfer-ownership", s.transferOwnership)
 	return r
+}
+
+func (s *server) ready(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+	defer cancel()
+	if err := s.db.Ping(ctx); err != nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"ok": false})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
 func (s *server) migrate(ctx context.Context) error {
@@ -319,7 +333,7 @@ func (s *server) sync(c *gin.Context) {
 		Operations []operation `json:"operations"`
 	}
 	if err := c.ShouldBindJSON(&in); err != nil {
-		c.JSON(400, gin.H{"error": "invalid JSON"})
+		c.JSON(invalidJSONStatus(err), gin.H{"error": "invalid JSON"})
 		return
 	}
 	u := current(c)
@@ -962,7 +976,11 @@ func (s *server) updateMe(c *gin.Context) {
 		Phone string `json:"phone"`
 	}
 	if err := c.ShouldBindJSON(&in); err != nil || strings.TrimSpace(in.Name) == "" {
-		c.JSON(400, gin.H{"error": "name is required"})
+		status := http.StatusBadRequest
+		if err != nil {
+			status = invalidJSONStatus(err)
+		}
+		c.JSON(status, gin.H{"error": "name is required"})
 		return
 	}
 	u := current(c)
@@ -979,7 +997,11 @@ func (s *server) createUser(c *gin.Context) {
 	}
 	var u user
 	if err := c.ShouldBindJSON(&u); err != nil || strings.TrimSpace(u.Name) == "" {
-		c.JSON(400, gin.H{"error": "name is required"})
+		status := http.StatusBadRequest
+		if err != nil {
+			status = invalidJSONStatus(err)
+		}
+		c.JSON(status, gin.H{"error": "name is required"})
 		return
 	}
 	u.ID = newID()
@@ -1006,7 +1028,11 @@ func (s *server) updateUser(c *gin.Context) {
 	}
 	var u user
 	if err := c.ShouldBindJSON(&u); err != nil || strings.TrimSpace(u.Name) == "" {
-		c.JSON(400, gin.H{"error": "name is required"})
+		status := http.StatusBadRequest
+		if err != nil {
+			status = invalidJSONStatus(err)
+		}
+		c.JSON(status, gin.H{"error": "name is required"})
 		return
 	}
 	tag := c.Param("id")

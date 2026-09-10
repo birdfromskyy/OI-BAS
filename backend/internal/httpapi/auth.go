@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"net/http"
 	"strings"
@@ -18,7 +19,11 @@ func scanUser(row pgx.Row) (user, error) {
 	return u, err
 }
 
-func (s *server) accessURL(t string) string { return s.cfg.baseURL + "/?access=" + t }
+// Access tokens are put in the URL fragment. Fragments are never sent in HTTP
+// requests, so web-server logs, reverse proxies and Referer headers cannot
+// accidentally receive a newly issued personal link. The frontend also keeps
+// compatibility with old query-string links before cleaning them from history.
+func (s *server) accessURL(t string) string { return s.cfg.baseURL + "/#access=" + t }
 
 // Bootstrap creates the only initial account. Subsequent accounts must be
 // created by a user with administrative rights through the API.
@@ -47,15 +52,24 @@ func (s *server) requireUser(c *gin.Context) {
 	h := strings.TrimSpace(c.GetHeader("Authorization"))
 	const p = "Bearer "
 	if !strings.HasPrefix(h, p) {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "access link is required"})
+		rejectInvalidAccess(c, "access link is required")
+		return
+	}
+	raw := strings.TrimSpace(strings.TrimPrefix(h, p))
+	if len(raw) != 64 {
+		rejectInvalidAccess(c, "access link is invalid or revoked")
+		return
+	}
+	if _, err := hex.DecodeString(raw); err != nil {
+		rejectInvalidAccess(c, "access link is invalid or revoked")
 		return
 	}
 	// A personal link doubles as invitation acceptance. Its first valid use
 	// activates the account atomically; revoked and deactivated accounts are
 	// intentionally excluded from this transition.
-	u, err := scanUser(s.db.QueryRow(c, "UPDATE users SET status='активен',updated_at=now() WHERE access_hash=$1 AND access_revoked_at IS NULL AND status IN ('активен','приглашён') RETURNING id,name,position,roles,phone,flight_hours,flight_count,status", tokenHash(strings.TrimPrefix(h, p))))
+	u, err := scanUser(s.db.QueryRow(c, "UPDATE users SET status='активен',updated_at=now() WHERE access_hash=$1 AND access_revoked_at IS NULL AND status IN ('активен','приглашён') RETURNING id,name,position,roles,phone,flight_hours,flight_count,status", tokenHash(raw)))
 	if errors.Is(err, pgx.ErrNoRows) {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "access link is invalid or revoked"})
+		rejectInvalidAccess(c, "access link is invalid or revoked")
 		return
 	}
 	if err != nil {

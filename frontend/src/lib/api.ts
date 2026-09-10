@@ -14,16 +14,30 @@ export class APIError extends Error {
 }
 
 /** Секрет из выданной ссылки сохраняется только на устройстве пользователя. */
+export function accessTokenFromURL(value: string): string {
+	try {
+		const url = new URL(value);
+		// Новые ссылки используют fragment (#access): браузер не отправляет его
+		// Caddy, API и внешним сайтам через Referer. Query-параметр оставлен
+		// только для уже выданных ссылок предыдущих версий приложения.
+		const fromFragment = new URLSearchParams(url.hash.replace(/^#/, '')).get('access');
+		return fromFragment ?? url.searchParams.get('access') ?? '';
+	} catch {
+		return '';
+	}
+}
+
 export function accessToken(): string {
 	if (!browser) return '';
 	const url = new URL(location.href);
-	const fromLink = url.searchParams.get('access');
+	const fromLink = accessTokenFromURL(url.toString());
 	if (fromLink) {
 		// sessionStorage is tab-local: an administrator can verify a newly
 		// issued link in another tab without silently losing their own session.
 		sessionStorage.setItem(SESSION_TOKEN_KEY, fromLink);
 		localStorage.setItem(TOKEN_KEY, fromLink);
 		url.searchParams.delete('access');
+		if (new URLSearchParams(url.hash.replace(/^#/, '')).has('access')) url.hash = '';
 		history.replaceState(null, '', url);
 	}
 	return sessionStorage.getItem(SESSION_TOKEN_KEY) ?? localStorage.getItem(TOKEN_KEY) ?? '';

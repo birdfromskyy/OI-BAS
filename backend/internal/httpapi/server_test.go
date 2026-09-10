@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -47,6 +48,13 @@ func TestIdentifiersAndTokenHash(t *testing.T) {
 	}
 	if bytes.Equal(tokenHash(raw), []byte(raw)) || len(tokenHash(raw)) != 32 {
 		t.Fatal("access token is not stored as SHA-256")
+	}
+}
+
+func TestAccessURLUsesFragment(t *testing.T) {
+	s := &server{cfg: config{baseURL: "https://oi-bas.space"}}
+	if got := s.accessURL("secret"); got != "https://oi-bas.space/#access=secret" {
+		t.Fatalf("access URL = %q", got)
 	}
 }
 
@@ -471,11 +479,20 @@ func decodeBody(t *testing.T, result *httptest.ResponseRecorder, into any) {
 }
 func accessFromURL(t *testing.T, value string) string {
 	t.Helper()
-	const marker = "?access="
-	index := strings.Index(value, marker)
-	if index < 0 || len(value) == index+len(marker) {
+	parsed, err := url.Parse(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	access := parsed.Query().Get("access")
+	if access == "" {
+		access = parsed.Fragment
+		if values, err := url.ParseQuery(parsed.Fragment); err == nil {
+			access = values.Get("access")
+		}
+	}
+	if access == "" {
 		t.Fatalf("invalid access URL")
 	}
-	return value[index+len(marker):]
+	return access
 }
 func sameRoles(got, want []string) bool { return strings.Join(got, ",") == strings.Join(want, ",") }

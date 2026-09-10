@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { rememberAccessToken } from '$lib/api';
+	import { accessTokenFromURL, rememberAccessToken } from '$lib/api';
 
-	const token = $derived(page.url.searchParams.get('access') ?? '');
+	const token = $derived(accessTokenFromURL(page.url.toString()));
 	function enter() {
 		if (!token) return;
 		// Токен сохраняется и для текущей вкладки, и для устройства. Полная
