@@ -12,7 +12,7 @@ FROM dependencies AS build
 COPY . .
 RUN npm run build
 
-FROM caddy:2.10-alpine AS production
+FROM caddy:2.11-alpine AS production
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/build /usr/share/caddy
 EXPOSE 80
