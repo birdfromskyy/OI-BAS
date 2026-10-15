@@ -27,7 +27,7 @@ jobs:
       IMAGE_TAG: ${{ inputs.image_tag || github.ref_name }}
       SHA_TAG: sha-${{ github.sha }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
